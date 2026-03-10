@@ -16,7 +16,50 @@
     body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;line-height:1.7;overflow-x:hidden;}
     body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4;}
 
-    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:1.2rem 3rem;background:rgba(7,9,13,0.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+    /* AVAILABILITY BANNER */
+    .avail-banner {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 101;
+      background: rgba(0, 255, 157, 0.07);
+      border-bottom: 1px solid rgba(0, 255, 157, 0.25);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 0.5rem 2rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      color: var(--accent2);
+    }
+
+    .avail-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent2);
+      flex-shrink: 0;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,157,0.6); }
+      50% { box-shadow: 0 0 0 5px rgba(0,255,157,0); }
+    }
+
+    .avail-banner a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(0,229,255,0.3);
+      padding-bottom: 1px;
+      transition: border-color 0.2s;
+    }
+    .avail-banner a:hover { border-color: var(--accent); }
+
+    .avail-divider { color: var(--muted); }
+
+    nav{position:fixed;top: 33px;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:1.2rem 3rem;background:rgba(7,9,13,0.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
     .nav-logo{font-family:var(--mono);color:var(--accent);font-size:0.95rem;letter-spacing:0.1em;}
     .nav-links{display:flex;gap:2rem;list-style:none;}
     .nav-links a{color:var(--muted);text-decoration:none;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;transition:color 0.2s;}
@@ -24,7 +67,7 @@
 
     .hero-bg{position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;opacity:0.2;mask-image:radial-gradient(ellipse 70% 70% at 30% 40%,black,transparent);pointer-events:none;}
 
-    #hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:6rem 3rem 3rem;max-width:var(--max);margin:0 auto;gap:4rem;position:relative;}
+    #hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:8rem 3rem 3rem;max-width:var(--max);margin:0 auto;gap:4rem;position:relative;}
     .hero-glow{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,0.05) 0%,transparent 65%);top:50%;left:20%;transform:translate(-50%,-50%);pointer-events:none;}
     .hero-left{position:relative;z-index:1;}
     .hero-tag{font-family:var(--mono);font-size:0.78rem;color:var(--accent);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:1.2rem;opacity:0;animation:fadeUp 0.6s ease forwards 0.2s;}
@@ -79,8 +122,6 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transform: scale(1.0);
-      object-position: center top;
     }
 
     .hex-placeholder {
@@ -222,6 +263,14 @@
 <body>
   <div class="hero-bg"></div>
 
+  <!-- AVAILABILITY BANNER -->
+  <div class="avail-banner">
+    <div class="avail-dot"></div>
+    <span>Actively seeking new opportunities &mdash; Cybersecurity roles, remote or Melbourne, FL</span>
+    <span class="avail-divider">|</span>
+    <a href="#contact">Get in touch &rarr;</a>
+  </div>
+
   <nav>
     <div class="nav-logo">km://</div>
     <ul class="nav-links">
@@ -267,7 +316,7 @@
         </div>
 
         <div class="stats-panel">
-          <p class="stats-panel-title">// profile</p>
+          <p class="stats-panel-title">// profile.json</p>
           <div class="stat-row"><span class="stat-label">status</span><span class="stat-value green">Actively Seeking</span></div>
           <div class="stat-row"><span class="stat-label">clearance</span><span class="clearance-badge">SECRET</span></div>
           <div class="stat-row"><span class="stat-label">experience</span><span class="stat-value blue">5+ Years</span></div>
