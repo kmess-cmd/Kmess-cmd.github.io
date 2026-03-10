@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kyle Messer | Cybersecurity Professional</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #080b0f;
+      --bg2:       #0d1117;
+      --bg3:       #111820;
+      --accent:    #00e5ff;
+      --accent2:   #00ff9d;
+      --text:      #c9d1d9;
+      --muted:     #4a5568;
+      --border:    #1e2d3d;
+      --mono:      'Share Tech Mono', monospace;
+      --sans:      'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-weight: 300;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* Noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 4rem;
+      background: rgba(8, 11, 15, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: var(--mono);
+      color: var(--accent);
+      font-size: 1rem;
+      letter-spacing: 0.1em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.3;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%);
+      top: 50%; left: 30%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .hero-content { position: relative; z-index: 1; max-width: 800px; }
+
+    .hero-tag {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.2s;
+    }
+
+    .hero-name {
+      font-family: var(--mono);
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      color: #fff;
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.4s;
+    }
+
+    .hero-name span { color: var(--accent); }
+
+    .hero-title {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: var(--muted);
+      margin-top: 1rem;
+      font-weight: 300;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.6s;
+    }
+
+    .hero-bio {
+      max-width: 550px;
+      margin-top: 1.5rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.8s;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 1s;
+    }
+
+    .btn {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.75rem 1.75rem;
+      border-radius: 2px;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+    .btn-primary:hover { background: #fff; }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+    .btn-outline:hover { background: rgba(0,229,255,0.08); }
+
+    /* ── SECTIONS ── */
+    section { padding: 6rem 4rem; position: relative; }
+    section:nth-child(even) { background: var(--bg2); }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+      font-family: var(--mono);
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      color: #fff;
+      font-weight: 400;
+      margin-bottom: 3rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .max-w { max-width: 1000px; margin: 0 auto; }
+
+    /* ── CERTS ── */
+    .cert-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .cert-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1.5rem;
+      transition: border-color 0.2s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cert-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--accent);
+    }
+
+    .cert-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .cert-name {
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      color: #fff;
+      margin-bottom: 0.4rem;
+    }
+
+    .cert-issuer {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .cert-status {
+      display: inline-block;
+      margin-top: 0.75rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 2px;
+      letter-spacing: 0.1em;
+    }
+
+    .status-active { background: rgba(0,255,157,0.1); color: var(--accent2); border: 1px solid rgba(0,255,157,0.3); }
+    .status-progress { background: rgba(0,229,255,0.1); color: var(--accent); border: 1px solid rgba(0,229,255,0.3); }
+
+    /* ── EDUCATION ── */
+    .edu-block {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .edu-block::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    .edu-school {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      color: #fff;
+      margin-bottom: 0.3rem;
+    }
+
+    .edu-degree {
+      color: var(--accent);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .edu-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    .edu-courses {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .edu-courses h4 {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      padding: 0.25rem 0.65rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--text);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── PROJECTS ── */
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .project-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1.75rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .project-card:hover {
+      border-color: var(--accent2);
+      transform: translateY(-2px);
+    }
+
+    .project-type {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--accent2);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .project-name {
+      font-family: var(--mono);
+      font-size: 1rem;
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+
+    .project-desc {
+      font-size: 0.875rem;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── SKILLS ── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .skill-group h3 {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .skill-group ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .skill-group li {
+      font-size: 0.875rem;
+      color: var(--text);
+      padding-left: 1rem;
+      position: relative;
+    }
+
+    .skill-group li::before {
+      content: '›';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+    }
+
+    /* ── CONTACT ── */
+    .contact-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+
+    .contact-info h3 {
+      font-family: var(--mono);
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .contact-info p {
+      font-size: 0.9rem;
+      color: var(--text);
+      margin-bottom: 2rem;
+    }
+
+    .social-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .social-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.875rem;
+      transition: color 0.2s;
+      font-family: var(--mono);
+    }
+
+    .social-link:hover { color: var(--accent); }
+
+    .social-link span {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      min-width: 70px;
+    }
+
+    /* ── FORM ── */
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      transition: border-color 0.2s;
+      outline: none;
+      resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .form-group textarea { min-height: 120px; }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 2rem 4rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer p {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { gap: 1.2rem; }
+      section { padding: 4rem 1.5rem; }
+      #hero { padding: 0 1.5rem; }
+      .contact-wrapper { grid-template-columns: 1fr; gap: 2rem; }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">km://</div>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#certs">Certs</a></li>
+      <li><a href="#education">Education</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+      <p class="hero-tag">// Cybersecurity Professional</p>
+      <h1 class="hero-name">Kyle<br><span>Messer</span></h1>
+      <p class="hero-title">Security+ · A+ · Google IT · WGU B.S. Cybersecurity</p>
+      <p class="hero-bio">
+        Driven cybersecurity professional with a foundation in IT support, network security, and ethical hacking. 
+        Committed to building defensive expertise while actively exploring offensive security techniques. 
+        Currently pursuing a B.S. in Cybersecurity & Information Assurance at WGU.
+      </p>
+      <div class="hero-cta">
+        <a href="#contact" class="btn btn-primary">Get In Touch</a>
+        <a href="#projects" class="btn btn-outline">View Projects</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CERTIFICATIONS -->
+  <section id="certs">
+    <div class="max-w">
+      <p class="section-label fade-in">// 01</p>
+      <h2 class="section-title fade-in">Certifications</h2>
+      <div class="cert-grid">
+
+        <div class="cert-card fade-in">
+          <p class="cert-name">CompTIA Security+</p>
+          <p class="cert-issuer">CompTIA</p>
+          <span class="cert-status status-active">Active</span>
+        </div>
+
+        <div class="cert-card fade-in">
+          <p class="cert-name">CompTIA A+</p>
+          <p class="cert-issuer">CompTIA</p>
+          <span class="cert-status status-active">Active</span>
+        </div>
+
+        <div class="cert-card fade-in">
+          <p class="cert-name">Google IT Professional</p>
+          <p class="cert-issuer">Google / Coursera</p>
+          <span class="cert-status status-active">Active</span>
+        </div>
+
+        <div class="cert-card fade-in">
+          <p class="cert-name">CompTIA Network+</p>
+          <p class="cert-issuer">CompTIA</p>
+          <span class="cert-status status-progress">In Progress</span>
+        </div>
+
+        <div class="cert-card fade-in">
+          <p class="cert-name">CompTIA CySA+</p>
+          <p class="cert-issuer">CompTIA</p>
+          <span class="cert-status status-progress">Planned</span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- EDUCATION -->
+  <section id="education">
+    <div class="max-w">
+      <p class="section-label fade-in">// 02</p>
+      <h2 class="section-title fade-in">Education</h2>
+      <div class="edu-block fade-in">
+        <p class="edu-school">Western Governors University</p>
+        <p class="edu-degree">B.S. Cybersecurity & Information Assurance</p>
+        <p class="edu-meta">Est. Graduation: Mid 2027 &nbsp;·&nbsp; Currently Enrolled</p>
+        <div class="edu-courses">
+          <h4>Relevant Coursework & Certifications Track</h4>
+          <div class="tag-list">
+            <span class="tag">Network Security</span>
+            <span class="tag">Ethical Hacking</span>
+            <span class="tag">Cyber Defense</span>
+            <span class="tag">Digital Forensics</span>
+            <span class="tag">Risk Management</span>
+            <span class="tag">Linux Administration</span>
+            <span class="tag">Cloud Security</span>
+            <span class="tag">Scripting & Automation</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="max-w">
+      <p class="section-label fade-in">// 03</p>
+      <h2 class="section-title fade-in">Skills</h2>
+      <div class="skills-grid">
+        <div class="skill-group fade-in">
+          <h3>Security</h3>
+          <ul>
+            <li>Network Security</li>
+            <li>Vulnerability Assessment</li>
+            <li>Threat Analysis</li>
+            <li>SIEM Fundamentals</li>
+            <li>Incident Response</li>
+          </ul>
+        </div>
+        <div class="skill-group fade-in">
+          <h3>Offensive</h3>
+          <ul>
+            <li>Prompt Injection / AI Hacking</li>
+            <li>Penetration Testing (TryHackMe)</li>
+            <li>Hack The Box</li>
+            <li>Reconnaissance</li>
+            <li>CTF Challenges</li>
+          </ul>
+        </div>
+        <div class="skill-group fade-in">
+          <h3>Technical</h3>
+          <ul>
+            <li>Python</li>
+            <li>Arduino / Embedded Systems</li>
+            <li>Linux / CLI</li>
+            <li>IT Support & Troubleshooting</li>
+            <li>HTML / CSS</li>
+          </ul>
+        </div>
+        <div class="skill-group fade-in">
+          <h3>Platforms</h3>
+          <ul>
+            <li>Windows & Windows Server</li>
+            <li>Linux (Ubuntu, Kali)</li>
+            <li>GitHub</li>
+            <li>TryHackMe</li>
+            <li>Hack The Box</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="max-w">
+      <p class="section-label fade-in">// 04</p>
+      <h2 class="section-title fade-in">Projects</h2>
+      <div class="project-grid">
+
+        <div class="project-card fade-in">
+          <p class="project-type">Skills · AI Security</p>
+          <p class="project-name">AI Prompt Injection Training</p>
+          <p class="project-desc">
+            Actively studying AI attack surfaces through Lakera's prompt injection course. 
+            Exploring how large language models can be manipulated and how to defend against 
+            adversarial inputs — an emerging and critical area of cybersecurity.
+          </p>
+        </div>
+
+        <div class="project-card fade-in">
+          <p class="project-type">Skills · Ethical Hacking</p>
+          <p class="project-name">TryHackMe & Hack The Box</p>
+          <p class="project-desc">
+            Hands-on practice with real-world penetration testing scenarios including 
+            privilege escalation, web exploitation, and network analysis through 
+            gamified hacking platforms. Returning to active participation.
+          </p>
+        </div>
+
+        <div class="project-card fade-in">
+          <p class="project-type">Personal · Education</p>
+          <p class="project-name">Python & Arduino with Kids</p>
+          <p class="project-desc">
+            Teaching foundational programming concepts to my children using Python 
+            scripting and Arduino hardware projects. Building logic, problem-solving, 
+            and a passion for technology from the ground up.
+          </p>
+        </div>
+
+        <div class="project-card fade-in">
+          <p class="project-type">Personal · Web</p>
+          <p class="project-name">This Portfolio Site</p>
+          <p class="project-desc">
+            Designed and built from scratch using HTML and CSS — no frameworks, no 
+            templates. Hosted on GitHub Pages with a custom domain. Demonstrates 
+            initiative, self-learning, and technical range beyond security.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="max-w">
+      <p class="section-label fade-in">// 05</p>
+      <h2 class="section-title fade-in">Contact</h2>
+      <div class="contact-wrapper">
+
+        <div class="contact-info fade-in">
+          <h3>Let's connect.</h3>
+          <p>
+            Open to cybersecurity roles, internships, and collaborative opportunities. 
+            Whether you have a position in mind or just want to talk security — reach out.
+          </p>
+          <div class="social-links">
+            <a href="https://www.linkedin.com/in/bkylemesser" target="_blank" rel="noopener" class="social-link">
+              <span>LinkedIn</span> /in/bkylemesser
+            </a>
+            <a href="https://github.com/kmess-cmd" target="_blank" rel="noopener" class="social-link">
+              <span>GitHub</span> /kmess-cmd
+            </a>
+          </div>
+        </div>
+
+        <!-- FORMSPREE: Replace YOUR_FORM_ID with your actual Formspree form ID -->
+        <form
+          class="contact-form fade-in"
+          action="https://formspree.io/f/YOUR_FORM_ID"
+          method="POST"
+        >
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" placeholder="Your name" required />
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="your@email.com" required />
+          </div>
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" placeholder="What's on your mind?" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="align-self: flex-start;">Send Message</button>
+        </form>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 Kyle Messer</p>
+    <p>Built by hand · Hosted on <a href="https://pages.github.com" target="_blank">GitHub Pages</a></p>
+  </footer>
+
+  <!-- SCROLL ANIMATIONS -->
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
