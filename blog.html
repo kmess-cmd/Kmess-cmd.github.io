@@ -163,70 +163,117 @@
     // To add a new post, copy a post object and fill in the fields.
     // category options: tool | walkthrough | study | news | career
     const POSTS = [
-      {
-        id: 'passaudit-writeup',
-        title: 'Building PassAudit: A Password Strength Analyzer from Scratch',
-        category: 'tool',
-        date: 'March 2026',
-        readTime: '5 min read',
-        excerpt: 'How I built a browser-based password strength analyzer using vanilla JavaScript — covering entropy calculation, crack time estimation, common password blacklisting, and why no tool can guarantee 100% security.',
-        content: `
-<h2>Why I Built This</h2>
-<p>Password security is one of the most fundamental concepts in cybersecurity — and one of the most misunderstood by everyday users. After years of working in security operations and watching people reuse weak passwords across systems, I wanted to build something that could visually explain <em>why</em> a password is weak or strong, not just tell you it is.</p>
-<p>PassAudit is my first publicly released security tool. It runs entirely in the browser — no server, no data collection, no backend. Everything stays on your device.</p>
+     ```javascript
+{
+  id: 'building-passaudit-a-password-strength-analyzer',
+  title: 'Building PassAudit: A Password Strength Analyzer',
+  category: 'tool',
+  date: 'March 2025',
+  readTime: '8 min read',
+  excerpt: 'Building a client-side password analyzer that reveals why "P@ssw0rd123" isn\'t as clever as people think.',
+  content: `
+    <p>When I show colleagues my password analyzer tool, the most common reaction is always the same. They confidently type in their "clever" password - you know the type, <code>P@ssw0rd123</code> or <code>Summ3r2024!</code> - expecting to see a green checkmark. Instead, they watch in disbelief as the tool flags it as weak and estimates it would crack in minutes.</p>
 
-<h2>How It Works</h2>
-<h3>Entropy Calculation</h3>
-<p>The core of any password strength assessment is <strong>entropy</strong> — a measure of randomness or unpredictability. The formula is straightforward:</p>
-<pre><code>Entropy (bits) = length × log₂(pool_size)</code></pre>
-<p>Where <code>pool_size</code> is the number of possible characters based on what character sets are used:</p>
-<ul>
-  <li>Lowercase only: 26</li>
-  <li>+ Uppercase: +26 (52 total)</li>
-  <li>+ Numbers: +10 (62 total)</li>
-  <li>+ Special characters: +32 (94 total)</li>
-</ul>
-<p>A password with 128+ bits of entropy is considered extremely strong against brute-force attacks.</p>
+    <p>Here's the hard truth: those deliberate substitutions don't fool anyone. Attackers have known about leet speak for decades, and every serious cracking wordlist includes these variations automatically. After years supporting Department of State contractors and watching users recycle predictable passwords on government systems, I decided to build a tool that shows people exactly why their "secure" passwords aren't.</p>
 
-<h3>Crack Time Estimation</h3>
-<p>Once we have entropy, we can estimate how long a brute-force attack would take:</p>
-<pre><code>combinations = 2^entropy
-seconds = combinations / 2 / attempts_per_second</code></pre>
-<p>PassAudit calculates two scenarios:</p>
-<ul>
-  <li><strong>Online attack</strong> — 1,000 attempts/sec (typical rate-limited login)</li>
-  <li><strong>Offline attack</strong> — 10 billion attempts/sec (GPU-accelerated hash cracking)</li>
-</ul>
+    <h2>Why Client-Side Analysis Matters</h2>
 
-<h3>Common Password Blacklist</h3>
-<p>Entropy alone doesn't tell the whole story. A password like <code>Password1!</code> scores reasonably well on complexity checks but appears on every known password list. PassAudit checks against a curated blacklist of the most commonly used passwords and immediately flags them regardless of their entropy score.</p>
+    <p>The biggest problem with most password checkers is trust. How can you verify the strength of your most sensitive passwords by sending them to someone else's server? You can't. That's why PassAudit runs entirely in your browser using vanilla HTML, CSS, and JavaScript - no frameworks, no backend, nothing ever leaves your device.</p>
 
-<h3>Scoring</h3>
-<p>The final score out of 100 is calculated from three components:</p>
-<ul>
-  <li><strong>Length (0–30 points)</strong> — longer passwords are exponentially harder to crack</li>
-  <li><strong>Complexity (0–40 points)</strong> — 10 points each for uppercase, lowercase, numbers, and special characters</li>
-  <li><strong>Entropy bonus (0–30 points)</strong> — rewards passwords that achieve high randomness</li>
-</ul>
+    <p>This wasn't just a technical decision; it was a security philosophy. If you're going to analyze passwords, the tool itself needs to demonstrate security best practices. Client-side execution means you maintain complete control over your data.</p>
 
-<h2>Key Lessons Learned</h2>
-<p>Building this tool reinforced several things I already knew from my security operations work but hadn't thought about from a developer's perspective:</p>
-<ul>
-  <li>Password length matters more than complexity. A 20-character lowercase passphrase beats a 10-character "complex" password.</li>
-  <li>Pattern-based passwords (like <code>P@ssw0rd!</code>) are well-known to attackers and crack faster than their entropy suggests.</li>
-  <li>No client-side tool can detect if your password has been exposed in a data breach — for that, check <a href="https://haveibeenpwned.com" target="_blank">haveibeenpwned.com</a>.</li>
-</ul>
+    <h2>The Analysis Engine: Beyond Simple Rules</h2>
 
-<h2>What's Next</h2>
-<p>Future improvements I'm considering:</p>
-<ul>
-  <li>HaveIBeenPwned API integration to check if a password has appeared in known breaches</li>
-  <li>Passphrase generator with entropy display</li>
-  <li>Side-by-side comparison mode</li>
-</ul>
-<p>You can try PassAudit at <a href="/passaudit.html">kylemesser.com/passaudit</a>. All analysis happens in your browser — nothing is ever transmitted.</p>
-        `
-      }
+    <p>PassAudit evaluates passwords across multiple dimensions that matter in real-world attacks:</p>
+
+    <h3>Length Requirements</h3>
+    <p>Anything under 12 characters gets flagged immediately. This isn't arbitrary - it's based on the mathematical reality of how exponentially harder passwords become to crack as they grow longer.</p>
+
+    <h3>Character Set Diversity</h3>
+    <p>The tool checks for uppercase, lowercase, numbers, and special characters. But here's what makes it different: it doesn't just check boxes. It calculates the actual entropy based on the character pool being used.</p>
+
+    <h3>Entropy Calculation: The Math That Matters</h3>
+
+    <p>Here's where the real security analysis happens:</p>
+
+    <pre><code>function calculateEntropy(password) {
+    let poolSize = 0;
+    if (/[a-z]/.test(password)) poolSize += 26;
+    if (/[A-Z]/.test(password)) poolSize += 26;
+    if (/[0-9]/.test(password)) poolSize += 10;
+    if (/[^a-zA-Z0-9]/.test(password)) poolSize += 32;
+    
+    return password.length * Math.log2(poolSize);
+}</code></pre>
+
+    <p>The formula is straightforward: <code>length × log₂(pool_size)</code>. A 12-character password using all four character sets has a pool of 94 possible characters per position, giving us <code>12 × log₂(94) ≈ 78 bits</code> of entropy. Anything above 128 bits is considered extremely strong.</p>
+
+    <p>This mathematical approach cuts through the security theater. A 20-character password using only lowercase letters (<code>20 × log₂(26) ≈ 94 bits</code>) is stronger than an 8-character password with mixed case, numbers, and symbols (<code>8 × log₂(94) ≈ 52 bits</code>).</p>
+
+    <h3>The Blacklist: Learning from Breaches</h3>
+
+    <p>I compiled over 50 known weak passwords from breach data and common password lists. The patterns were depressingly predictable:</p>
+
+    <ul>
+      <li><strong>Seasonal passwords</strong>: <code>Winter2023</code>, <code>Summer2024</code> - people love adding the current year</li>
+      <li><strong>Keyboard walks</strong>: <code>qwerty</code>, <code>1q2w3e4r</code> - muscle memory isn't security</li>
+      <li><strong>Leet speak</strong>: <code>P@ssw0rd</code>, <code>Welc0me!</code> - substitutions that fool no one</li>
+      <li><strong>Enterprise favorites</strong>: Variations of "welcome" dominated new account setups</li>
+    </ul>
+
+    <p>In government environments, I consistently saw first name + birth year combinations and seasonal patterns. These crack in seconds with basic dictionary attacks.</p>
+
+    <h2>Making Math Meaningful: Crack Time Estimates</h2>
+
+    <p>Raw entropy numbers don't resonate with most users, so PassAudit translates them into estimated crack times under two realistic scenarios:</p>
+
+    <ul>
+      <li><strong>Online attacks</strong>: 1,000 attempts per second (rate-limited by the target system)</li>
+      <li><strong>Offline GPU attacks</strong>: 10 billion attempts per second (stolen password hashes)</li>
+    </ul>
+
+    <p>This gives users concrete understanding of their risk. That <code>P@ssw0rd123</code> they thought was clever? It's in the offline cracking category of "seconds to minutes."</p>
+
+    <h2>Technical Implementation: Real-Time Without Lag</h2>
+
+    <p>Getting smooth real-time analysis required some careful performance considerations:</p>
+
+    <pre><code>passwordInput.addEventListener('input', function() {
+    const password = this.value;
+    const entropy = calculateEntropy(password);
+    const crackTime = calculateCrackTime(entropy);
+    
+    updateUI(entropy, crackTime);
+    animateStrengthRing(entropy);
+});</code></pre>
+
+    <p>Everything triggers on the input event with no debouncing needed - all calculations are synchronous and lightweight. The animated strength ring uses CSS transitions, and the crack time counter uses <code>requestAnimationFrame</code> for smooth rendering without blocking the main thread.</p>
+
+    <h2>Privacy by Design: The HIBP Integration Plan</h2>
+
+    <p>The next major feature is integration with HaveIBeenPwned's database of 600+ million breached passwords. But how do you check against breached passwords while maintaining client-side privacy?</p>
+
+    <p>The answer is k-anonymity. HIBP provides an API where you hash your password with SHA-1, send only the first 5 characters of the hash, and receive back all matching hash suffixes. Your actual password never leaves the browser, but you still get breach detection.</p>
+
+    <p>It's a perfect example of privacy-preserving security architecture.</p>
+
+    <h2>Lessons Learned from Building vs. Buying</h2>
+
+    <p>Building PassAudit taught me more about password security than years of using commercial tools. When you implement the entropy calculations yourself, you truly understand why length matters more than complexity. When you compile the blacklist, you see the patterns attackers exploit.</p>
+
+    <p>Most importantly, it forced me to think about trust in security tools. Every decision - from client-side architecture to the planned HIBP integration - had to prioritize user privacy while delivering meaningful security analysis.</p>
+
+    <h2>What's Next</h2>
+
+    <p>The roadmap includes:</p>
+    <ul>
+      <li><strong>HaveIBeenPwned integration</strong> using k-anonymity</li>
+      <li><strong>Passphrase generator</strong> for creating truly strong passwords</li>
+      <li><strong>Bulk analysis mode</strong> for security audits</li>
+      <li><strong>Side-by-side comparison</strong> for password migration planning</li>
+    </ul>
+
+    <p>You can try PassAudit at <a href="https://kylemesser.com/passaudit.html" target="_blank">kylemesser.com/passaudit.html</a> - and since it's
     ];
 
     // ─── RENDER ──────────────────────────────────────────────────────────────
