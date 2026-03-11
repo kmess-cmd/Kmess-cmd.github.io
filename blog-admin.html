@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Blog Admin — Kyle Messer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #07090d; --bg2: #0b0f16; --bg3: #101520;
+      --accent: #00e5ff; --accent2: #00ff9d; --yellow: #ffd166; --red: #ff4655;
+      --text: #c9d1d9; --muted: #4a5568; --border: #1a2333;
+      --mono: 'Share Tech Mono', monospace; --sans: 'DM Sans', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-weight: 300; min-height: 100vh; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 60px 60px; opacity: 0.15; pointer-events: none; }
+
+    /* LAYOUT */
+    .app { display: grid; grid-template-columns: 320px 1fr; min-height: 100vh; position: relative; z-index: 1; }
+
+    /* SIDEBAR */
+    .sidebar { background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; overflow-y: auto; }
+
+    .sidebar-header { padding: 1.5rem; border-bottom: 1px solid var(--border); position: relative; }
+    .sidebar-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+    .sidebar-logo { font-family: var(--mono); font-size: 0.85rem; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 0.25rem; }
+    .sidebar-sub { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; }
+
+    .sidebar-section { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); }
+    .sidebar-label { font-family: var(--mono); font-size: 0.65rem; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 0.75rem; }
+
+    .form-group { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem; }
+    .form-group label { font-family: var(--mono); font-size: 0.62rem; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+    .form-group input, .form-group select, .form-group textarea {
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 2px;
+      padding: 0.6rem 0.75rem; color: var(--text); font-family: var(--mono); font-size: 0.78rem;
+      outline: none; transition: border-color 0.2s; width: 100%;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); }
+    .form-group select { cursor: pointer; }
+    .form-group select option { background: var(--bg3); }
+    .form-group textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+    .api-note { font-family: var(--mono); font-size: 0.62rem; color: var(--muted); line-height: 1.5; margin-top: 0.25rem; }
+    .api-note a { color: var(--accent); }
+
+    .btn { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.65rem 1.25rem; border-radius: 2px; border: none; cursor: pointer; transition: all 0.2s; width: 100%; font-weight: 700; }
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-primary:hover { background: #fff; }
+    .btn-primary:disabled { background: var(--muted); color: var(--bg); cursor: not-allowed; }
+    .btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--accent); margin-top: 0.5rem; }
+    .btn-outline:hover { background: rgba(0,229,255,0.08); }
+    .btn-green { background: var(--accent2); color: #000; margin-top: 0.5rem; }
+    .btn-green:hover { background: #fff; }
+    .btn-danger { background: transparent; color: var(--red); border: 1px solid rgba(255,70,85,0.3); margin-top: 0.5rem; }
+    .btn-danger:hover { background: rgba(255,70,85,0.08); }
+
+    /* MAIN */
+    .main { display: flex; flex-direction: column; }
+
+    /* TOP BAR */
+    .topbar { padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--bg2); }
+    .topbar-title { font-family: var(--mono); font-size: 0.85rem; color: #fff; letter-spacing: 0.08em; }
+    .topbar-status { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; }
+    .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--muted); margin-right: 0.4rem; }
+    .status-dot.active { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,255,157,0.6);}50%{box-shadow:0 0 0 5px rgba(0,255,157,0);} }
+
+    /* CHAT AREA */
+    .chat-area { flex: 1; padding: 2rem; display: flex; flex-direction: column; gap: 1.25rem; overflow-y: auto; min-height: 400px; }
+
+    .msg { display: flex; flex-direction: column; gap: 0.3rem; max-width: 85%; }
+    .msg.user { align-self: flex-end; align-items: flex-end; }
+    .msg.assistant { align-self: flex-start; align-items: flex-start; }
+
+    .msg-label { font-family: var(--mono); font-size: 0.62rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+    .msg-bubble { padding: 0.85rem 1.1rem; border-radius: 4px; font-size: 0.875rem; line-height: 1.7; }
+    .msg.user .msg-bubble { background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.2); color: #fff; }
+    .msg.assistant .msg-bubble { background: var(--bg3); border: 1px solid var(--border); color: var(--text); }
+    .msg.assistant .msg-bubble pre { background: var(--bg2); border: 1px solid var(--border); border-radius: 3px; padding: 0.75rem; margin: 0.5rem 0; overflow-x: auto; }
+    .msg.assistant .msg-bubble code { font-family: var(--mono); font-size: 0.82rem; color: var(--accent2); }
+    .msg.assistant .msg-bubble pre code { display: block; }
+    .msg.assistant .msg-bubble strong { color: #fff; }
+    .msg.assistant .msg-bubble h2, .msg.assistant .msg-bubble h3 { font-family: var(--mono); color: var(--accent); font-weight: 400; margin: 0.75rem 0 0.4rem; font-size: 0.9rem; }
+
+    .typing-indicator { display: none; align-self: flex-start; }
+    .typing-indicator.show { display: flex; gap: 0.4rem; align-items: center; padding: 0.75rem 1rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; }
+    .typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: typingBounce 1.2s infinite; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce { 0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);background:var(--accent);} }
+
+    /* INPUT ROW */
+    .input-row { padding: 1.25rem 2rem; border-top: 1px solid var(--border); display: flex; gap: 0.75rem; background: var(--bg2); }
+    .chat-input { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: 0.75rem 1rem; color: #fff; font-family: var(--sans); font-size: 0.875rem; outline: none; transition: border-color 0.2s; resize: none; min-height: 44px; max-height: 120px; line-height: 1.5; }
+    .chat-input:focus { border-color: var(--accent); }
+    .send-btn { background: var(--accent); color: #000; border: none; border-radius: 3px; padding: 0 1.25rem; font-family: var(--mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
+    .send-btn:hover { background: #fff; }
+    .send-btn:disabled { background: var(--muted); cursor: not-allowed; }
+
+    /* OUTPUT SECTION */
+    .output-section { border-top: 1px solid var(--border); padding: 1.5rem 2rem; background: var(--bg); display: none; }
+    .output-section.show { display: block; }
+    .output-label { font-family: var(--mono); font-size: 0.65rem; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 0.75rem; }
+    .output-code { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 1.25rem; font-family: var(--mono); font-size: 0.72rem; color: var(--accent2); line-height: 1.6; overflow-x: auto; white-space: pre-wrap; word-break: break-all; max-height: 300px; overflow-y: auto; }
+    .output-actions { display: flex; gap: 0.75rem; margin-top: 0.75rem; }
+    .output-actions .btn { width: auto; }
+
+    /* WELCOME */
+    .welcome-msg { text-align: center; padding: 3rem 2rem; color: var(--muted); }
+    .welcome-msg h2 { font-family: var(--mono); font-size: 1rem; color: #fff; margin-bottom: 0.75rem; font-weight: 400; }
+    .welcome-msg p { font-size: 0.85rem; line-height: 1.7; margin-bottom: 0.5rem; }
+    .prompt-suggestions { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-top: 1.5rem; }
+    .prompt-chip { font-family: var(--mono); font-size: 0.68rem; padding: 0.4rem 0.85rem; border: 1px solid var(--border); border-radius: 2px; color: var(--text); cursor: pointer; transition: all 0.2s; background: var(--bg3); letter-spacing: 0.05em; }
+    .prompt-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+    @media (max-width: 768px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { height: auto; position: relative; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">km:// blog admin</div>
+      <div class="sidebar-sub">AI writing assistant</div>
+    </div>
+
+    <!-- API KEY -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">API Configuration</div>
+      <div class="form-group">
+        <label>Anthropic API Key</label>
+        <input type="password" id="apiKey" placeholder="sk-ant-..." />
+        <span class="api-note">Get your key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>. Never shared or stored.</span>
+      </div>
+    </div>
+
+    <!-- POST METADATA -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Post Details</div>
+      <div class="form-group">
+        <label>Post Title</label>
+        <input type="text" id="postTitle" placeholder="e.g. TryHackMe: Mr Robot Room"/>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="postCategory">
+          <option value="tool">Tool Writeup</option>
+          <option value="walkthrough">Walkthrough</option>
+          <option value="study">Study Notes</option>
+          <option value="news">Industry News</option>
+          <option value="career">Career</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Your Notes / Key Points</label>
+        <textarea id="postNotes" placeholder="Paste your rough notes, bullet points, or what you want to cover..."></textarea>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Actions</div>
+      <button class="btn btn-primary" onclick="startSession()">Start Writing Session</button>
+      <button class="btn btn-outline" onclick="generatePost()">Generate Full Post Draft</button>
+      <button class="btn btn-green" onclick="generateCode()">Export Post as HTML</button>
+      <button class="btn btn-danger" onclick="clearChat()">Clear Session</button>
+    </div>
+
+    <!-- INSTRUCTIONS -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">How to use</div>
+      <p style="font-family:var(--mono);font-size:0.62rem;color:var(--muted);line-height:1.7;">
+        1. Enter your API key<br/>
+        2. Fill in post details<br/>
+        3. Click "Start Writing Session"<br/>
+        4. Chat to refine your post<br/>
+        5. Click "Generate Full Post Draft"<br/>
+        6. Export as HTML and add to blog.html
+      </p>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title">// writing assistant</div>
+      <div class="topbar-status">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Ready</span>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="chat-area" id="chatArea">
+      <div class="welcome-msg">
+        <h2>Welcome to your Blog Writing Assistant</h2>
+        <p>I'll help you turn your raw notes and ideas into polished cybersecurity blog posts that match your voice and showcase your expertise.</p>
+        <p>Fill in the post details on the left, then click <strong>Start Writing Session</strong> or ask me anything below.</p>
+        <div class="prompt-suggestions">
+          <div class="prompt-chip" onclick="usePrompt(this)">Help me write about PassAudit</div>
+          <div class="prompt-chip" onclick="usePrompt(this)">Write an intro for a TryHackMe walkthrough</div>
+          <div class="prompt-chip" onclick="usePrompt(this)">Turn my notes into a blog post</div>
+          <div class="prompt-chip" onclick="usePrompt(this)">What should I include in a tool writeup?</div>
+          <div class="prompt-chip" onclick="usePrompt(this)">Help me explain entropy to beginners</div>
+          <div class="prompt-chip" onclick="usePrompt(this)">Write a study notes post about Security+</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="typing-indicator" id="typingIndicator">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>
+
+    <!-- INPUT -->
+    <div class="input-row">
+      <textarea
+        class="chat-input"
+        id="chatInput"
+        placeholder="Ask the assistant anything, or describe what you want to write..."
+        onkeydown="handleKey(event)"
+        rows="1"
+      ></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send</button>
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="output-section" id="outputSection">
+      <div class="output-label">Generated Post Code — Copy into blog.html POSTS array</div>
+      <div class="output-code" id="outputCode"></div>
+      <div class="output-actions">
+        <button class="btn btn-primary" onclick="copyCode()" style="width:auto;">Copy Code</button>
+        <button class="btn btn-outline" onclick="document.getElementById('outputSection').classList.remove('show')" style="width:auto;">Dismiss</button>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+  let messages = [];
+  let isLoading = false;
+
+  const SYSTEM_PROMPT = `You are a specialized blog writing assistant for Kyle Messer, a cybersecurity professional based in Melbourne, FL.
+
+Kyle's background:
+- 5+ years in cybersecurity supporting Department of State contractors
+- Holds Secret clearance, CompTIA Security+, A+, Google IT certifications
+- Currently pursuing B.S. Cybersecurity at WGU, working toward Network+ and CySA+
+- Experience with Tenable/Nessus, SIEM platforms, SolarWinds, Active Directory, incident response
+- Building tools and studying offensive security via TryHackMe and Hack The Box
+- Exploring AI security / prompt injection via Lakera
+- Teaches his kids Python and Arduino
+
+Writing style guidelines:
+- Clear, confident, and technically accurate — but accessible to beginners
+- First-person, authentic voice — not overly formal
+- Practical focus — show what you did, why it matters, what you learned
+- Include code snippets where relevant
+- Use section headers to organize content
+- End posts with lessons learned or next steps
+
+When generating full blog posts, structure them with:
+- An engaging intro explaining WHY this topic matters
+- Clear technical sections with headers
+- Code examples where relevant
+- Real-world context from security operations experience
+- A "lessons learned" or "takeaways" conclusion
+
+Output HTML-formatted content (using h2, h3, p, ul, li, code, pre, strong tags) suitable for the blog.`;
+
+  function setStatus(text, active) {
+    document.getElementById('statusText').textContent = text;
+    document.getElementById('statusDot').className = 'status-dot' + (active ? ' active' : '');
+  }
+
+  function addMessage(role, content, isHtml = false) {
+    const area = document.getElementById('chatArea');
+
+    // Remove welcome msg if present
+    const welcome = area.querySelector('.welcome-msg');
+    if (welcome) welcome.remove();
+
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+
+    const label = document.createElement('div');
+    label.className = 'msg-label';
+    label.textContent = role === 'user' ? 'You' : 'Assistant';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble';
+
+    if (isHtml) {
+      bubble.innerHTML = content;
+    } else {
+      // Simple markdown-like rendering
+      bubble.innerHTML = content
+        .replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/## (.+)/g, '<h2>$1</h2>')
+        .replace(/### (.+)/g, '<h3>$1</h3>')
+        .replace(/\n/g, '<br/>');
+    }
+
+    div.appendChild(label);
+    div.appendChild(bubble);
+    area.appendChild(div);
+    area.scrollTop = area.scrollHeight;
+  }
+
+  async function sendToAPI(userMessages) {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    if (!apiKey) {
+      addMessage('assistant', '⚠ Please enter your Anthropic API key in the sidebar to use the writing assistant.');
+      return null;
+    }
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2048,
+        system: SYSTEM_PROMPT,
+        messages: userMessages
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error?.message || 'API error');
+    }
+
+    const data = await response.json();
+    return data.content[0].text;
+  }
+
+  async function sendMessage() {
+    if (isLoading) return;
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+    input.style.height = 'auto';
+    addMessage('user', text);
+    messages.push({ role: 'user', content: text });
+
+    isLoading = true;
+    document.getElementById('sendBtn').disabled = true;
+    document.getElementById('typingIndicator').classList.add('show');
+    setStatus('Writing...', true);
+
+    try {
+      const reply = await sendToAPI(messages);
+      if (reply) {
+        messages.push({ role: 'assistant', content: reply });
+        addMessage('assistant', reply);
+      }
+    } catch (err) {
+      addMessage('assistant', `⚠ Error: ${err.message}. Check your API key and try again.`);
+    } finally {
+      isLoading = false;
+      document.getElementById('sendBtn').disabled = false;
+      document.getElementById('typingIndicator').classList.remove('show');
+      setStatus('Ready', false);
+    }
+  }
+
+  async function startSession() {
+    const title = document.getElementById('postTitle').value.trim();
+    const category = document.getElementById('postCategory').value;
+    const notes = document.getElementById('postNotes').value.trim();
+
+    const catLabels = { tool: 'Tool Writeup', walkthrough: 'Walkthrough', study: 'Study Notes', news: 'Industry News', career: 'Career' };
+
+    let prompt = `I want to write a blog post`;
+    if (title) prompt += ` titled "${title}"`;
+    prompt += ` in the "${catLabels[category]}" category.`;
+    if (notes) prompt += `\n\nHere are my notes and key points:\n${notes}`;
+    prompt += `\n\nPlease help me outline this post and ask me any questions that would help make it better.`;
+
+    document.getElementById('chatInput').value = prompt;
+    sendMessage();
+  }
+
+  async function generatePost() {
+    const title = document.getElementById('postTitle').value.trim() || 'Untitled Post';
+    const prompt = `Based on our conversation so far, please write a complete, polished blog post titled "${title}". Format it with proper HTML tags (h2, h3, p, ul, li, code, pre, strong). Make it thorough, technically accurate, and written in my voice as a cybersecurity professional.`;
+
+    document.getElementById('chatInput').value = prompt;
+    sendMessage();
+  }
+
+  async function generateCode() {
+    const title = document.getElementById('postTitle').value.trim() || 'My Blog Post';
+    const category = document.getElementById('postCategory').value;
+    const date = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+    const prompt = `Please generate the JavaScript post object code that I can add to the POSTS array in my blog.html file. 
+
+Format it exactly like this structure:
+{
+  id: '${id}',
+  title: '${title}',
+  category: '${category}',
+  date: '${date}',
+  readTime: 'X min read',
+  excerpt: 'A 1-2 sentence summary...',
+  content: \`[full HTML content here]\`
+}
+
+Base the content on everything we've discussed in this session. Make the HTML content complete and well-formatted.`;
+
+    document.getElementById('chatInput').value = prompt;
+
+    // After sending, capture the response for the output section
+    isLoading = true;
+    document.getElementById('sendBtn').disabled = true;
+    document.getElementById('typingIndicator').classList.add('show');
+    setStatus('Generating code...', true);
+
+    const input = document.getElementById('chatInput');
+    input.value = '';
+    addMessage('user', prompt);
+    messages.push({ role: 'user', content: prompt });
+
+    try {
+      const reply = await sendToAPI(messages);
+      if (reply) {
+        messages.push({ role: 'assistant', content: reply });
+        addMessage('assistant', reply);
+
+        // Show in output section
+        const outputSection = document.getElementById('outputSection');
+        document.getElementById('outputCode').textContent = reply;
+        outputSection.classList.add('show');
+        outputSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    } catch (err) {
+      addMessage('assistant', `⚠ Error: ${err.message}`);
+    } finally {
+      isLoading = false;
+      document.getElementById('sendBtn').disabled = false;
+      document.getElementById('typingIndicator').classList.remove('show');
+      setStatus('Ready', false);
+    }
+  }
+
+  function copyCode() {
+    const code = document.getElementById('outputCode').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = event.target;
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy Code', 2000);
+    });
+  }
+
+  function clearChat() {
+    messages = [];
+    const area = document.getElementById('chatArea');
+    area.innerHTML = `
+      <div class="welcome-msg">
+        <h2>Session Cleared</h2>
+        <p>Start a new writing session by filling in your post details and clicking Start Writing Session.</p>
+      </div>`;
+    document.getElementById('outputSection').classList.remove('show');
+    setStatus('Ready', false);
+  }
+
+  function usePrompt(el) {
+    document.getElementById('chatInput').value = el.textContent;
+    document.getElementById('chatInput').focus();
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+    // Auto-resize textarea
+    e.target.style.height = 'auto';
+    e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+  }
+</script>
+</body>
+</html>
