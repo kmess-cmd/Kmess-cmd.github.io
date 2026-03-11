@@ -163,117 +163,94 @@
     // To add a new post, copy a post object and fill in the fields.
     // category options: tool | walkthrough | study | news | career
     const POSTS = [
-     ```javascript
-{
-  id: 'building-passaudit-a-password-strength-analyzer',
-  title: 'Building PassAudit: A Password Strength Analyzer',
-  category: 'tool',
-  date: 'March 2025',
-  readTime: '8 min read',
-  excerpt: 'Building a client-side password analyzer that reveals why "P@ssw0rd123" isn\'t as clever as people think.',
-  content: `
-    <p>When I show colleagues my password analyzer tool, the most common reaction is always the same. They confidently type in their "clever" password - you know the type, <code>P@ssw0rd123</code> or <code>Summ3r2024!</code> - expecting to see a green checkmark. Instead, they watch in disbelief as the tool flags it as weak and estimates it would crack in minutes.</p>
+    {
+        id: 'passaudit-writeup',
+        title: 'Building PassAudit: A Password Strength Analyzer',
+        category: 'tool',
+        date: 'March 2026',
+        readTime: '6 min read',
+        excerpt: 'After years watching users recycle predictable passwords on government systems, I built a client-side password analyzer that shows exactly why "clever" passwords aren\'t. Here\'s how the math works.',
+        content: `
+<h2>The Reaction That Inspired This Tool</h2>
+<p>When I show colleagues my password analyzer, the most common reaction is always the same. They confidently type in their "clever" password — P@ssw0rd123 or Summ3r2024! — expecting a green checkmark. Instead, they watch in disbelief as the tool flags it as weak and estimates it would crack in minutes.</p>
+<p>Here's the hard truth: those deliberate substitutions don't fool anyone. Attackers have known about leet speak for decades, and every serious cracking wordlist includes these variations automatically. After years supporting Department of State contractors and watching users recycle predictable passwords on government systems, I decided to build a tool that shows people exactly why their "secure" passwords aren't.</p>
 
-    <p>Here's the hard truth: those deliberate substitutions don't fool anyone. Attackers have known about leet speak for decades, and every serious cracking wordlist includes these variations automatically. After years supporting Department of State contractors and watching users recycle predictable passwords on government systems, I decided to build a tool that shows people exactly why their "secure" passwords aren't.</p>
+<h2>Why Client-Side Analysis Matters</h2>
+<p>The biggest problem with most password checkers is trust. How can you verify the strength of your most sensitive passwords by sending them to someone else's server? You can't. That's why PassAudit runs entirely in your browser using vanilla HTML, CSS, and JavaScript — no frameworks, no backend, nothing ever leaves your device.</p>
+<p>This wasn't just a technical decision — it was a security philosophy. If you're going to analyze passwords, the tool itself needs to demonstrate security best practices. Client-side execution means you maintain complete control over your data.</p>
 
-    <h2>Why Client-Side Analysis Matters</h2>
+<h2>The Analysis Engine: Beyond Simple Rules</h2>
+<p>PassAudit evaluates passwords across multiple dimensions that matter in real-world attacks.</p>
 
-    <p>The biggest problem with most password checkers is trust. How can you verify the strength of your most sensitive passwords by sending them to someone else's server? You can't. That's why PassAudit runs entirely in your browser using vanilla HTML, CSS, and JavaScript - no frameworks, no backend, nothing ever leaves your device.</p>
+<h3>Length Requirements</h3>
+<p>Anything under 12 characters gets flagged immediately. This isn't arbitrary — it's based on the mathematical reality of how exponentially harder passwords become to crack as they grow longer.</p>
 
-    <p>This wasn't just a technical decision; it was a security philosophy. If you're going to analyze passwords, the tool itself needs to demonstrate security best practices. Client-side execution means you maintain complete control over your data.</p>
+<h3>Character Set Diversity</h3>
+<p>The tool checks for uppercase, lowercase, numbers, and special characters. But here's what makes it different: it doesn't just check boxes. It calculates the actual entropy based on the character pool being used.</p>
 
-    <h2>The Analysis Engine: Beyond Simple Rules</h2>
+<h3>Entropy Calculation: The Math That Matters</h3>
+<p>Here's where the real security analysis happens:</p>
+<pre><code>function calculateEntropy(password) {
+  let poolSize = 0;
+  if (/[a-z]/.test(password)) poolSize += 26;
+  if (/[A-Z]/.test(password)) poolSize += 26;
+  if (/[0-9]/.test(password)) poolSize += 10;
+  if (/[^a-zA-Z0-9]/.test(password)) poolSize += 32;
 
-    <p>PassAudit evaluates passwords across multiple dimensions that matter in real-world attacks:</p>
-
-    <h3>Length Requirements</h3>
-    <p>Anything under 12 characters gets flagged immediately. This isn't arbitrary - it's based on the mathematical reality of how exponentially harder passwords become to crack as they grow longer.</p>
-
-    <h3>Character Set Diversity</h3>
-    <p>The tool checks for uppercase, lowercase, numbers, and special characters. But here's what makes it different: it doesn't just check boxes. It calculates the actual entropy based on the character pool being used.</p>
-
-    <h3>Entropy Calculation: The Math That Matters</h3>
-
-    <p>Here's where the real security analysis happens:</p>
-
-    <pre><code>function calculateEntropy(password) {
-    let poolSize = 0;
-    if (/[a-z]/.test(password)) poolSize += 26;
-    if (/[A-Z]/.test(password)) poolSize += 26;
-    if (/[0-9]/.test(password)) poolSize += 10;
-    if (/[^a-zA-Z0-9]/.test(password)) poolSize += 32;
-    
-    return password.length * Math.log2(poolSize);
+  return password.length * Math.log2(poolSize);
 }</code></pre>
+<p>The formula is straightforward: <code>length × log₂(pool_size)</code>. A 12-character password using all four character sets has a pool of 94 possible characters per position, giving us <code>12 × log₂(94) ≈ 78 bits</code> of entropy. Anything above 128 bits is considered extremely strong.</p>
+<p>This mathematical approach cuts through the security theater. A 20-character password using only lowercase letters (≈94 bits) is stronger than an 8-character password with mixed case, numbers, and symbols (≈52 bits).</p>
 
-    <p>The formula is straightforward: <code>length × log₂(pool_size)</code>. A 12-character password using all four character sets has a pool of 94 possible characters per position, giving us <code>12 × log₂(94) ≈ 78 bits</code> of entropy. Anything above 128 bits is considered extremely strong.</p>
+<h3>The Blacklist: Learning from Breaches</h3>
+<p>I compiled over 50 known weak passwords from breach data and common password lists. The patterns were depressingly predictable:</p>
+<ul>
+  <li><strong>Seasonal passwords:</strong> Winter2023, Summer2024 — people love adding the current year</li>
+  <li><strong>Keyboard walks:</strong> qwerty, 1q2w3e4r — muscle memory isn't security</li>
+  <li><strong>Leet speak:</strong> P@ssw0rd, Welc0me! — substitutions that fool no one</li>
+  <li><strong>Enterprise favorites:</strong> Variations of "welcome" dominated new account setups in government environments</li>
+</ul>
+<p>In government environments, I consistently saw first name + birth year combinations and seasonal patterns. These crack in seconds with basic dictionary attacks.</p>
 
-    <p>This mathematical approach cuts through the security theater. A 20-character password using only lowercase letters (<code>20 × log₂(26) ≈ 94 bits</code>) is stronger than an 8-character password with mixed case, numbers, and symbols (<code>8 × log₂(94) ≈ 52 bits</code>).</p>
+<h2>Making Math Meaningful: Crack Time Estimates</h2>
+<p>Raw entropy numbers don't resonate with most users, so PassAudit translates them into estimated crack times under two realistic scenarios:</p>
+<ul>
+  <li><strong>Online attacks:</strong> 1,000 attempts per second (rate-limited by the target system)</li>
+  <li><strong>Offline GPU attacks:</strong> 10 billion attempts per second (stolen password hashes)</li>
+</ul>
+<p>This gives users concrete understanding of their risk. That P@ssw0rd123 they thought was clever? It falls into the offline cracking category of "seconds to minutes."</p>
 
-    <h3>The Blacklist: Learning from Breaches</h3>
+<h2>Technical Implementation: Real-Time Without Lag</h2>
+<p>Getting smooth real-time analysis required some careful performance considerations:</p>
+<pre><code>passwordInput.addEventListener('input', function() {
+  const password = this.value;
+  const entropy = calculateEntropy(password);
+  const crackTime = calculateCrackTime(entropy);
 
-    <p>I compiled over 50 known weak passwords from breach data and common password lists. The patterns were depressingly predictable:</p>
-
-    <ul>
-      <li><strong>Seasonal passwords</strong>: <code>Winter2023</code>, <code>Summer2024</code> - people love adding the current year</li>
-      <li><strong>Keyboard walks</strong>: <code>qwerty</code>, <code>1q2w3e4r</code> - muscle memory isn't security</li>
-      <li><strong>Leet speak</strong>: <code>P@ssw0rd</code>, <code>Welc0me!</code> - substitutions that fool no one</li>
-      <li><strong>Enterprise favorites</strong>: Variations of "welcome" dominated new account setups</li>
-    </ul>
-
-    <p>In government environments, I consistently saw first name + birth year combinations and seasonal patterns. These crack in seconds with basic dictionary attacks.</p>
-
-    <h2>Making Math Meaningful: Crack Time Estimates</h2>
-
-    <p>Raw entropy numbers don't resonate with most users, so PassAudit translates them into estimated crack times under two realistic scenarios:</p>
-
-    <ul>
-      <li><strong>Online attacks</strong>: 1,000 attempts per second (rate-limited by the target system)</li>
-      <li><strong>Offline GPU attacks</strong>: 10 billion attempts per second (stolen password hashes)</li>
-    </ul>
-
-    <p>This gives users concrete understanding of their risk. That <code>P@ssw0rd123</code> they thought was clever? It's in the offline cracking category of "seconds to minutes."</p>
-
-    <h2>Technical Implementation: Real-Time Without Lag</h2>
-
-    <p>Getting smooth real-time analysis required some careful performance considerations:</p>
-
-    <pre><code>passwordInput.addEventListener('input', function() {
-    const password = this.value;
-    const entropy = calculateEntropy(password);
-    const crackTime = calculateCrackTime(entropy);
-    
-    updateUI(entropy, crackTime);
-    animateStrengthRing(entropy);
+  updateUI(entropy, crackTime);
+  animateStrengthRing(entropy);
 });</code></pre>
+<p>Everything triggers on the input event with no debouncing needed — all calculations are synchronous and lightweight. The animated strength ring uses CSS transitions, and the crack time counter uses <code>requestAnimationFrame</code> for smooth rendering without blocking the main thread.</p>
 
-    <p>Everything triggers on the input event with no debouncing needed - all calculations are synchronous and lightweight. The animated strength ring uses CSS transitions, and the crack time counter uses <code>requestAnimationFrame</code> for smooth rendering without blocking the main thread.</p>
+<h2>Privacy by Design: The HIBP Integration Plan</h2>
+<p>The next major feature is integration with HaveIBeenPwned's database of 600+ million breached passwords. But how do you check against breached passwords while maintaining client-side privacy?</p>
+<p>The answer is <strong>k-anonymity</strong>. HIBP provides an API where you hash your password with SHA-1, send only the first 5 characters of the hash, and receive back all matching hash suffixes. Your actual password never leaves the browser, but you still get breach detection. It's a perfect example of privacy-preserving security architecture.</p>
 
-    <h2>Privacy by Design: The HIBP Integration Plan</h2>
+<h2>Lessons Learned from Building vs. Buying</h2>
+<p>Building PassAudit taught me more about password security than years of using commercial tools. When you implement the entropy calculations yourself, you truly understand why length matters more than complexity. When you compile the blacklist, you see the patterns attackers exploit.</p>
+<p>Most importantly, it forced me to think about trust in security tools. Every decision — from client-side architecture to the planned HIBP integration — had to prioritize user privacy while delivering meaningful security analysis.</p>
 
-    <p>The next major feature is integration with HaveIBeenPwned's database of 600+ million breached passwords. But how do you check against breached passwords while maintaining client-side privacy?</p>
-
-    <p>The answer is k-anonymity. HIBP provides an API where you hash your password with SHA-1, send only the first 5 characters of the hash, and receive back all matching hash suffixes. Your actual password never leaves the browser, but you still get breach detection.</p>
-
-    <p>It's a perfect example of privacy-preserving security architecture.</p>
-
-    <h2>Lessons Learned from Building vs. Buying</h2>
-
-    <p>Building PassAudit taught me more about password security than years of using commercial tools. When you implement the entropy calculations yourself, you truly understand why length matters more than complexity. When you compile the blacklist, you see the patterns attackers exploit.</p>
-
-    <p>Most importantly, it forced me to think about trust in security tools. Every decision - from client-side architecture to the planned HIBP integration - had to prioritize user privacy while delivering meaningful security analysis.</p>
-
-    <h2>What's Next</h2>
-
-    <p>The roadmap includes:</p>
-    <ul>
-      <li><strong>HaveIBeenPwned integration</strong> using k-anonymity</li>
-      <li><strong>Passphrase generator</strong> for creating truly strong passwords</li>
-      <li><strong>Bulk analysis mode</strong> for security audits</li>
-      <li><strong>Side-by-side comparison</strong> for password migration planning</li>
-    </ul>
-
-    <p>You can try PassAudit at <a href="https://kylemesser.com/passaudit.html" target="_blank">kylemesser.com/passaudit.html</a> - and since it's
+<h2>What's Next</h2>
+<ul>
+  <li>HaveIBeenPwned integration using k-anonymity</li>
+  <li>Passphrase generator for creating truly strong passwords</li>
+  <li>Bulk analysis mode for security audits</li>
+  <li>Side-by-side comparison for password migration planning</li>
+</ul>
+<p>You can try PassAudit at <a href="/passaudit.html">kylemesser.com/passaudit.html</a> — and since it's client-side only, you can view the source to see exactly how it works.</p>
+<p>The goal was never to build the most feature-rich password tool. It was to create something that demonstrates security fundamentals: client-side privacy, mathematical rigor, and real-world threat modeling. Sometimes the best way to understand a problem is to build the solution yourself.</p>
+        `
+      }
     ];
 
     // ─── RENDER ──────────────────────────────────────────────────────────────
