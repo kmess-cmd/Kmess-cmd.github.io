@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PassAudit — Password Strength Analyzer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #060810;
+      --bg2:     #0c1018;
+      --bg3:     #121820;
+      --border:  #1c2535;
+      --text:    #c8d0dc;
+      --muted:   #445566;
+      --mono:    'Share Tech Mono', monospace;
+      --sans:    'Syne', sans-serif;
+      --red:     #ff4655;
+      --orange:  #ff8c42;
+      --yellow:  #ffd166;
+      --green:   #00ff9d;
+      --cyan:    #00e5ff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 3rem 1.5rem 4rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.3;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 20%, black, transparent);
+      pointer-events: none;
+    }
+
+    /* Glow */
+    body::after {
+      content: '';
+      position: fixed;
+      width: 600px; height: 400px;
+      background: radial-gradient(ellipse, rgba(0,229,255,0.04) 0%, transparent 70%);
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    /* HEADER */
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-tag {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--cyan);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    h1 {
+      font-family: var(--mono);
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      color: #fff;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    h1 span { color: var(--cyan); }
+
+    .header-sub {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-top: 0.75rem;
+      font-family: var(--mono);
+      letter-spacing: 0.05em;
+    }
+
+    /* MAIN CARD */
+    .main-card {
+      width: 100%;
+      max-width: 680px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .main-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--cyan), var(--green));
+    }
+
+    /* INPUT */
+    .input-wrap {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .input-label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--cyan);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .input-field {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.9rem 3rem 0.9rem 1rem;
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-field:focus { border-color: var(--cyan); }
+    .input-field::placeholder { color: var(--muted); }
+
+    .toggle-btn {
+      position: absolute;
+      right: 0.75rem;
+      bottom: 0.85rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+      padding: 0.2rem;
+    }
+
+    .toggle-btn:hover { color: var(--cyan); }
+
+    /* SCORE DISPLAY */
+    .score-section {
+      display: none;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .score-section.visible { display: flex; }
+
+    /* Score circle + label */
+    .score-top {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .score-ring-wrap {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      flex-shrink: 0;
+    }
+
+    .score-ring-wrap svg {
+      transform: rotate(-90deg);
+      width: 100px;
+      height: 100px;
+    }
+
+    .score-ring-bg { fill: none; stroke: var(--border); stroke-width: 6; }
+    .score-ring-fill {
+      fill: none;
+      stroke-width: 6;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1), stroke 0.4s;
+    }
+
+    .score-num {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--mono);
+      font-size: 1.6rem;
+      color: #fff;
+      font-weight: 400;
+    }
+
+    .score-info { flex: 1; }
+
+    .score-rating {
+      font-family: var(--mono);
+      font-size: 1.2rem;
+      font-weight: 400;
+      margin-bottom: 0.4rem;
+      transition: color 0.4s;
+    }
+
+    .score-verdict {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* Crack time */
+    .crack-time {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+    }
+
+    .crack-label { color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.68rem; }
+    .crack-value { color: #fff; font-size: 0.9rem; }
+    .crack-method { color: var(--muted); font-size: 0.65rem; }
+
+    /* Checks grid */
+    .checks-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      transition: border-color 0.3s;
+    }
+
+    .check-item.pass { border-color: rgba(0,255,157,0.3); }
+    .check-item.fail { border-color: rgba(255,70,85,0.2); }
+
+    .check-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+
+    .check-item.pass .check-dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .check-item.fail .check-dot { background: var(--muted); }
+    .check-item.pass .check-text { color: #fff; }
+    .check-item.fail .check-text { color: var(--muted); }
+
+    /* Entropy bar */
+    .entropy-section { }
+
+    .entropy-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .entropy-val { color: var(--cyan); }
+
+    .entropy-bar-bg {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .entropy-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.6s cubic-bezier(0.4,0,0.2,1), background 0.4s;
+    }
+
+    /* Suggestions */
+    .suggestions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .suggestions-title {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--cyan);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    .suggestion-item {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--yellow);
+      padding-left: 1rem;
+      position: relative;
+      line-height: 1.5;
+    }
+
+    .suggestion-item::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--yellow);
+      font-size: 0.6rem;
+      top: 0.2rem;
+    }
+
+    /* Blacklist warning */
+    .blacklist-warning {
+      display: none;
+      background: rgba(255,70,85,0.08);
+      border: 1px solid rgba(255,70,85,0.3);
+      border-radius: 3px;
+      padding: 0.75rem 1rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--red);
+      letter-spacing: 0.05em;
+    }
+
+    .blacklist-warning.show { display: block; }
+
+    /* Score bar */
+    .score-bar-wrap {
+      margin-top: 0.5rem;
+    }
+
+    .score-bar-bg {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.8s cubic-bezier(0.4,0,0.2,1), background 0.4s;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 2rem;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-align: center;
+      letter-spacing: 0.1em;
+      position: relative;
+      z-index: 1;
+    }
+
+    footer a { color: var(--cyan); text-decoration: none; }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0.25rem 0;
+    }
+
+    @media (max-width: 500px) {
+      .checks-grid { grid-template-columns: 1fr; }
+      .score-top { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <p class="header-tag">// security tool v1.0</p>
+    <h1>Pass<span>Audit</span></h1>
+    <p class="header-sub">password strength analyzer · built by kyle messer</p>
+  </header>
+
+  <div class="main-card">
+
+    <!-- INPUT -->
+    <div class="input-wrap">
+      <label class="input-label" for="pwd">Enter Password</label>
+      <input
+        class="input-field"
+        type="password"
+        id="pwd"
+        placeholder="Type a password to analyze..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button class="toggle-btn" id="toggleBtn" onclick="toggleVisibility()">show</button>
+    </div>
+
+    <!-- BLACKLIST WARNING -->
+    <div class="blacklist-warning" id="blacklistWarning">
+      ⚠ This password appears on common password lists and would be cracked instantly.
+    </div>
+
+    <!-- SCORE SECTION -->
+    <div class="score-section" id="scoreSection">
+
+      <!-- Score ring + rating -->
+      <div class="score-top">
+        <div class="score-ring-wrap">
+          <svg viewBox="0 0 100 100">
+            <circle class="score-ring-bg" cx="50" cy="50" r="42"/>
+            <circle class="score-ring-fill" id="scoreRing" cx="50" cy="50" r="42"
+              stroke-dasharray="263.9"
+              stroke-dashoffset="263.9"
+            />
+          </svg>
+          <div class="score-num" id="scoreNum">0</div>
+        </div>
+        <div class="score-info">
+          <div class="score-rating" id="scoreRating">—</div>
+          <div class="score-verdict" id="scoreVerdict"></div>
+          <div class="score-bar-wrap">
+            <div class="score-bar-bg">
+              <div class="score-bar-fill" id="scoreBar" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Crack time -->
+      <div>
+        <div class="input-label" style="margin-bottom:0.5rem;">Estimated Crack Time</div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+          <div class="crack-time">
+            <div>
+              <div class="crack-label">Online Attack</div>
+              <div class="crack-method">(1,000 attempts/sec)</div>
+            </div>
+            <div class="crack-value" id="crackOnline">—</div>
+          </div>
+          <div class="crack-time">
+            <div>
+              <div class="crack-label">Offline Attack</div>
+              <div class="crack-method">(10 billion attempts/sec)</div>
+            </div>
+            <div class="crack-value" id="crackOffline">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Entropy -->
+      <div class="entropy-section">
+        <div class="entropy-label-row">
+          <span>Entropy Score</span>
+          <span class="entropy-val" id="entropyVal">0 bits</span>
+        </div>
+        <div class="entropy-bar-bg">
+          <div class="entropy-bar-fill" id="entropyBar" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Checks -->
+      <div>
+        <div class="input-label" style="margin-bottom:0.5rem;">Security Checks</div>
+        <div class="checks-grid" id="checksGrid">
+          <div class="check-item fail" id="chk-length">
+            <div class="check-dot"></div>
+            <span class="check-text">12+ characters</span>
+          </div>
+          <div class="check-item fail" id="chk-upper">
+            <div class="check-dot"></div>
+            <span class="check-text">Uppercase letters</span>
+          </div>
+          <div class="check-item fail" id="chk-lower">
+            <div class="check-dot"></div>
+            <span class="check-text">Lowercase letters</span>
+          </div>
+          <div class="check-item fail" id="chk-numbers">
+            <div class="check-dot"></div>
+            <span class="check-text">Numbers</span>
+          </div>
+          <div class="check-item fail" id="chk-special">
+            <div class="check-dot"></div>
+            <span class="check-text">Special characters</span>
+          </div>
+          <div class="check-item fail" id="chk-blacklist">
+            <div class="check-dot"></div>
+            <span class="check-text">Not blacklisted</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Suggestions -->
+      <div class="suggestions" id="suggestionsWrap">
+        <div class="suggestions-title">Recommendations</div>
+        <div id="suggestionsList"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    built by <a href="https://kylemesser.com" target="_blank">kylemesser.com</a>
+    &nbsp;·&nbsp; passwords never leave your browser
+  </footer>
+
+  <div style="max-width:680px;margin:1.25rem auto 0;padding:0 1.5rem;position:relative;z-index:1;">
+    <p style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:#334455;line-height:1.7;text-align:center;letter-spacing:0.04em;">
+      ⚠ DISCLAIMER: This tool provides an estimated analysis based on common security criteria and is intended for educational purposes only. A high score does not guarantee your password is secure or uncrackable. No password analyzer can account for all attack vectors, data breaches, phishing, social engineering, or other methods by which credentials may be compromised. Always use a reputable password manager, enable multi-factor authentication, and never reuse passwords across accounts. The author assumes no liability for any security incidents arising from the use or misuse of this tool.
+    </p>
+  </div>
+
+  <script>
+    // ─── COMMON PASSWORD BLACKLIST ───────────────────────────────────────────
+    const BLACKLIST = new Set([
+      'password','password1','password123','123456','12345678','123456789',
+      '1234567890','qwerty','qwerty123','abc123','letmein','monkey','dragon',
+      'master','sunshine','princess','welcome','shadow','superman','batman',
+      'football','baseball','soccer','hockey','iloveyou','trustno1','hello',
+      'charlie','donald','michael','jessica','ashley','pass','login','admin',
+      'root','toor','test','guest','user','default','changeme','pass123',
+      'p@ssword','p@ss123','p@ssw0rd','passw0rd','password!','qwertyuiop',
+      'asdfghjkl','zxcvbnm','1q2w3e4r','1qaz2wsx','111111','000000',
+      '696969','121212','654321','987654321','pass1234','secret','access',
+      'mypassword','newpass','temp','temp123','winter2023','summer2023',
+      'spring2024','fall2024','winter2024','summer2024','welcome1','hello123',
+    ]);
+
+    // ─── HELPERS ─────────────────────────────────────────────────────────────
+    function calcEntropy(pwd) {
+      let pool = 0;
+      if (/[a-z]/.test(pwd)) pool += 26;
+      if (/[A-Z]/.test(pwd)) pool += 26;
+      if (/[0-9]/.test(pwd)) pool += 10;
+      if (/[^a-zA-Z0-9]/.test(pwd)) pool += 32;
+      return pool > 0 ? Math.floor(pwd.length * Math.log2(pool)) : 0;
+    }
+
+    function formatTime(seconds) {
+      if (seconds < 1) return 'Instantly';
+      if (seconds < 60) return `${Math.round(seconds)} seconds`;
+      if (seconds < 3600) return `${Math.round(seconds/60)} minutes`;
+      if (seconds < 86400) return `${Math.round(seconds/3600)} hours`;
+      if (seconds < 2592000) return `${Math.round(seconds/86400)} days`;
+      if (seconds < 31536000) return `${Math.round(seconds/2592000)} months`;
+      if (seconds < 3153600000) return `${Math.round(seconds/31536000)} years`;
+      if (seconds < 315360000000) return `${Math.round(seconds/3153600000).toLocaleString()} centuries`;
+      return 'Practically forever';
+    }
+
+    function crackTime(entropy, attemptsPerSec) {
+      const combinations = Math.pow(2, entropy);
+      const seconds = combinations / 2 / attemptsPerSec;
+      return formatTime(seconds);
+    }
+
+    function getScoreColor(score) {
+      if (score < 25) return 'var(--red)';
+      if (score < 50) return 'var(--orange)';
+      if (score < 75) return 'var(--yellow)';
+      return 'var(--green)';
+    }
+
+    function getRating(score) {
+      if (score < 25) return { label: 'Critical', verdict: 'This password is dangerously weak. It would be cracked almost immediately by any attack method.' };
+      if (score < 50) return { label: 'Weak', verdict: 'This password offers minimal protection. A determined attacker could crack it in a short time.' };
+      if (score < 75) return { label: 'Fair', verdict: 'Decent but not great. With more length and complexity this could be significantly stronger.' };
+      if (score < 90) return { label: 'Strong', verdict: 'Good password. This would resist most automated attacks and would take significant time to crack.' };
+      return { label: 'Very Strong', verdict: 'Excellent password. This would be extremely difficult to crack even with advanced hardware.' };
+    }
+
+    function setCheck(id, pass) {
+      const el = document.getElementById(id);
+      el.className = 'check-item ' + (pass ? 'pass' : 'fail');
+    }
+
+    // ─── MAIN ANALYZER ───────────────────────────────────────────────────────
+    function analyze() {
+      const pwd = document.getElementById('pwd').value;
+      const section = document.getElementById('scoreSection');
+      const blacklistWarn = document.getElementById('blacklistWarning');
+
+      if (!pwd) {
+        section.classList.remove('visible');
+        blacklistWarn.classList.remove('show');
+        return;
+      }
+
+      section.classList.add('visible');
+
+      const isBlacklisted = BLACKLIST.has(pwd.toLowerCase());
+      const hasLength = pwd.length >= 12;
+      const hasUpper = /[A-Z]/.test(pwd);
+      const hasLower = /[a-z]/.test(pwd);
+      const hasNumbers = /[0-9]/.test(pwd);
+      const hasSpecial = /[^a-zA-Z0-9]/.test(pwd);
+      const entropy = calcEntropy(pwd);
+
+      // Blacklist warning
+      blacklistWarn.className = 'blacklist-warning' + (isBlacklisted ? ' show' : '');
+
+      // Set checks
+      setCheck('chk-length', hasLength);
+      setCheck('chk-upper', hasUpper);
+      setCheck('chk-lower', hasLower);
+      setCheck('chk-numbers', hasNumbers);
+      setCheck('chk-special', hasSpecial);
+      setCheck('chk-blacklist', !isBlacklisted);
+
+      // Calculate score (out of 100)
+      let score = 0;
+      if (isBlacklisted) {
+        score = 0;
+      } else {
+        // Length scoring (0-30)
+        if (pwd.length >= 20) score += 30;
+        else if (pwd.length >= 16) score += 25;
+        else if (pwd.length >= 12) score += 20;
+        else if (pwd.length >= 8) score += 12;
+        else score += 5;
+
+        // Complexity (0-40)
+        if (hasUpper)   score += 10;
+        if (hasLower)   score += 10;
+        if (hasNumbers) score += 10;
+        if (hasSpecial) score += 10;
+
+        // Entropy bonus (0-30)
+        if (entropy >= 128) score += 30;
+        else if (entropy >= 80) score += 22;
+        else if (entropy >= 60) score += 16;
+        else if (entropy >= 40) score += 10;
+        else if (entropy >= 28) score += 5;
+      }
+
+      score = Math.min(100, Math.max(0, score));
+
+      // Update score ring
+      const circumference = 263.9;
+      const offset = circumference - (score / 100) * circumference;
+      const ring = document.getElementById('scoreRing');
+      ring.style.strokeDashoffset = offset;
+      ring.style.stroke = getScoreColor(score);
+
+      // Score number
+      animateNumber('scoreNum', score);
+
+      // Score bar
+      const bar = document.getElementById('scoreBar');
+      bar.style.width = score + '%';
+      bar.style.background = getScoreColor(score);
+
+      // Rating
+      const { label, verdict } = getRating(score);
+      const ratingEl = document.getElementById('scoreRating');
+      ratingEl.textContent = label;
+      ratingEl.style.color = getScoreColor(score);
+      document.getElementById('scoreVerdict').textContent = verdict;
+
+      // Crack times
+      document.getElementById('crackOnline').textContent = isBlacklisted ? 'Instantly' : crackTime(entropy, 1000);
+      document.getElementById('crackOffline').textContent = isBlacklisted ? 'Instantly' : crackTime(entropy, 10000000000);
+
+      // Entropy
+      const entropyPct = Math.min(100, (entropy / 128) * 100);
+      document.getElementById('entropyVal').textContent = entropy + ' bits';
+      const eBar = document.getElementById('entropyBar');
+      eBar.style.width = entropyPct + '%';
+      eBar.style.background = getScoreColor(score);
+
+      // Suggestions
+      const suggestions = [];
+      if (isBlacklisted) suggestions.push('This is a known common password — choose something completely different.');
+      if (!hasLength) suggestions.push('Use at least 12 characters — longer is significantly stronger.');
+      if (!hasUpper) suggestions.push('Add uppercase letters (A-Z) to increase your character pool.');
+      if (!hasLower) suggestions.push('Include lowercase letters (a-z) for better complexity.');
+      if (!hasNumbers) suggestions.push('Mix in numbers (0-9) to make brute-force attacks harder.');
+      if (!hasSpecial) suggestions.push('Add special characters (!@#$%^&*) for maximum strength.');
+      if (pwd.length >= 8 && entropy < 40) suggestions.push('Avoid predictable patterns like "Password1!" — try a passphrase instead.');
+      if (score >= 90) suggestions.push('Excellent! Consider using a password manager to store it securely.');
+
+      const list = document.getElementById('suggestionsList');
+      list.innerHTML = suggestions.map(s =>
+        `<div class="suggestion-item">${s}</div>`
+      ).join('');
+    }
+
+    // Animate number counting up
+    function animateNumber(id, target) {
+      const el = document.getElementById(id);
+      const start = parseInt(el.textContent) || 0;
+      const duration = 600;
+      const startTime = performance.now();
+      function update(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.round(start + (target - start) * ease);
+        if (progress < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    }
+
+    function toggleVisibility() {
+      const input = document.getElementById('pwd');
+      const btn = document.getElementById('toggleBtn');
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = 'hide';
+      } else {
+        input.type = 'password';
+        btn.textContent = 'show';
+      }
+    }
+
+    document.getElementById('pwd').addEventListener('input', analyze);
+  </script>
+</body>
+</html>
