@@ -162,7 +162,188 @@
     // ─── POSTS DATA ──────────────────────────────────────────────────────────
     // To add a new post, copy a post object and fill in the fields.
     // category options: tool | walkthrough | study | news | career
-    const POSTS = [
+    const POSTS = [ From MySpace to kylemesser.com — What Profile Customization Taught Me About Web Development
+
+
+Every cybersecurity professional has an origin story. Mine started in 2006 with a blinking cursor, terrible HTML, and an unhealthy obsession with making my MySpace profile look "unique." What I didn't realize at the time was that those late nights copying and pasting CSS snippets were laying the foundation for everything I'd later do in cybersecurity — from understanding web vulnerabilities to building custom tools for incident response.
+
+
+Looking back at that journey from MySpace customization to building this professional site, I can see how those early experiments with code shaped my approach to security. Let me walk you through what profile customization actually taught me about web development, and why every security professional should understand the fundamentals of how the web works.
+
+
+The MySpace Era: Learning HTML by Breaking Things
+
+
+MySpace gave users something that seems almost unthinkable today — the ability to inject arbitrary HTML and CSS directly into their profiles. From a security perspective, this was a nightmare. From a learning perspective, it was incredible.
+
+
+I spent countless hours copying code from sites like "MySpace Layouts" and "Profile Pimp," pasting snippets like this into my profile:
+
+
+<style type="text/css">
+body {
+    background-color: #000000;
+    background-image: url('some-edgy-band-photo.jpg');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+.profileInfo {
+    background-color: transparent !important;
+}
+</style>
+
+
+
+Half the time, the code would break something else on the page. Tables would overflow, text would become unreadable, or entire sections would disappear. But that's exactly how I learned — by breaking things and figuring out how to fix them.
+
+
+What I was really learning, without realizing it, was:
+
+
+
+    DOM structure — How HTML elements nest and relate to each other
+
+    CSS specificity — Why some styles override others (hello, !important)
+
+    Cross-site scripting basics — Though I didn't know that's what it was called
+
+    Client-side vs. server-side — Understanding what happens in the browser vs. the server
+
+
+
+The Security Implications I Didn't See
+
+
+Years later, working in cybersecurity, I realized MySpace was essentially a giant XSS playground. Every custom profile was a potential attack vector. Users were injecting JavaScript, embedding external resources, and manipulating page behavior — all the things we now scan for with tools like Nessus.
+
+
+Consider this innocent-looking MySpace code:
+
+
+<img src="x" onerror="alert('XSS')" />
+
+
+
+That tiny snippet could execute JavaScript in anyone's browser who viewed your profile. MySpace eventually implemented some filtering, but it was always a cat-and-mouse game. Users found ways around restrictions, and the platform struggled to balance customization with security.
+
+
+This taught me an important lesson that I carry into my security work today: user input is never trustworthy. Every form field, every upload, every piece of data coming from a client needs to be validated and sanitized. The same creativity that made MySpace profiles unique also made them dangerous.
+
+
+Evolution: From Copy-Paste to Understanding
+
+
+As I moved beyond MySpace, I started building actual websites. First came simple HTML pages, then PHP sites with databases, then more complex applications. Each step built on what I'd learned from those early customization experiments.
+
+
+Building my current site, kylemesser.com, I applied lessons from that entire journey:
+
+
+Clean, Semantic HTML
+
+Instead of the nested table layouts that were common in the MySpace era, I use semantic HTML5:
+
+
+<header>
+    <nav>
+        <ul>
+            <li><a href="/blog">Blog</a></li>
+            <li><a href="/projects">Projects</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <article>
+        <h1>Post Title</h1>
+        <p>Content goes here...</p>
+    </article>
+</main>
+
+
+
+CSS That Actually Makes Sense
+
+Gone are the days of !important everywhere and inline styles. Now I use organized CSS with clear naming conventions:
+
+
+.blog-post {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.blog-post__title {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.blog-post__content p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+
+
+Security from the Ground Up
+
+Every form includes CSRF protection, all user input is validated and escaped, and I've implemented proper Content Security Policy headers:
+
+
+Content-Security-Policy: default-src 'self'; 
+script-src 'self' 'unsafe-inline'; 
+style-src 'self' 'unsafe-inline' fonts.googleapis.com; 
+font-src 'self' fonts.gstatic.com;
+
+
+
+Teaching My Kids: The Cycle Continues
+
+
+Now I'm teaching my kids Python and Arduino programming, and I see the same learning pattern emerging. They start by copying example code, breaking it, fixing it, and gradually understanding how it works. The tools have changed, but the process of learning through experimentation remains the same.
+
+
+I make sure to explain the security implications as we go. When we build a simple web form in Python Flask, we talk about why we need to validate input:
+
+
+from flask import Flask, request, escape
+
+app = Flask(__name__)
+
+@app.route('/contact', methods=['POST'])
+def contact():
+    # Always escape user input!
+    name = escape(request.form.get('name', ''))
+    message = escape(request.form.get('message', ''))
+    
+    # Process the clean data...
+    return f"Thanks, {name}!"
+
+
+
+How This Applies to Cybersecurity Work
+
+
+Understanding web development fundamentals has been crucial in my cybersecurity career. When I'm analyzing vulnerabilities found by Nessus scans, I can quickly understand the underlying issues because I know how web applications work.
+
+
+For example, when I see a SQL injection vulnerability, I don't just know it's dangerous — I understand exactly how an attacker could exploit it because I've built database-driven applications myself. When I'm investigating a potential XSS attack in our SIEM, I can trace the attack vector because I remember injecting my own JavaScript into MySpace profiles.
+
+
+This knowledge also helps when building security tools. I recently created a Python script to automate vulnerability scanning across multiple web applications. Because I understand both the security concerns and the development process, I can build tools that actually solve real problems.
+
+
+The Tools Keep Changing, The Fundamentals Don't
+
+
+We've gone from MySpace HTML to React applications, from simple PHP scripts to complex cloud architectures. But the core concepts remain the same:
+
+
+
+    Understand your data flow — Where does input come from? How is it processed? Where does it go?
+
+    Validate everything — Never trust user input, even from trusted users,
     {
         id: 'passaudit-writeup',
         title: 'Building PassAudit: A Password Strength Analyzer',
