@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Blog — Kyle Messer | Cybersecurity</title>
+  <meta name="description" content="Cybersecurity insights, tool writeups, TryHackMe walkthroughs, and career notes by Kyle Messer."/>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-0XGZPZLEQT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-0XGZPZLEQT');
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #07090d; --bg2: #0b0f16; --bg3: #101520;
+      --accent: #00e5ff; --accent2: #00ff9d;
+      --text: #c9d1d9; --muted: #4a5568; --border: #1a2333;
+      --mono: 'Share Tech Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+      --max: 900px;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 60px 60px; opacity: 0.15; pointer-events: none; }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 3rem; background: rgba(7,9,13,0.9); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+    .nav-logo { font-family: var(--mono); color: var(--accent); font-size: 0.95rem; letter-spacing: 0.1em; text-decoration: none; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; transition: color 0.2s; font-family: var(--mono); }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+    .page-header { padding: 8rem 3rem 3rem; max-width: var(--max); margin: 0 auto; }
+    .page-tag { font-family: var(--mono); font-size: 0.72rem; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.75rem; }
+    .page-title { font-family: var(--mono); font-size: clamp(2rem, 5vw, 3rem); color: #fff; font-weight: 400; margin-bottom: 0.75rem; }
+    .page-title span { color: var(--accent); }
+    .page-desc { font-size: 0.9rem; color: var(--muted); max-width: 500px; line-height: 1.7; }
+    .filters { padding: 0 3rem 2rem; max-width: var(--max); margin: 0 auto; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .filter-btn { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.35rem 0.85rem; border-radius: 2px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.2s; }
+    .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .filter-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+    .posts-wrap { padding: 0 3rem 6rem; max-width: var(--max); margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
+    .post-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; transition: border-color 0.2s, transform 0.2s; position: relative; overflow: hidden; cursor: pointer; text-decoration: none; display: block; color: inherit; }
+    .post-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), transparent); transition: background 0.3s; }
+    .post-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .post-card:hover::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+    .post-meta { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+    .post-tag { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.2rem 0.55rem; border-radius: 2px; }
+    .tag-tool        { background: rgba(0,229,255,0.1); color: var(--accent); border: 1px solid rgba(0,229,255,0.25); }
+    .tag-walkthrough { background: rgba(0,255,157,0.1); color: var(--accent2); border: 1px solid rgba(0,255,157,0.25); }
+    .tag-study       { background: rgba(255,209,102,0.1); color: #ffd166; border: 1px solid rgba(255,209,102,0.25); }
+    .tag-news        { background: rgba(255,70,85,0.1); color: #ff4655; border: 1px solid rgba(255,70,85,0.25); }
+    .tag-career      { background: rgba(180,100,255,0.1); color: #b464ff; border: 1px solid rgba(180,100,255,0.25); }
+    .post-date { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); letter-spacing: 0.08em; }
+    .post-read { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); margin-left: auto; }
+    .post-title { font-family: var(--mono); font-size: 1.1rem; color: #fff; margin-bottom: 0.6rem; line-height: 1.4; }
+    .post-excerpt { font-size: 0.875rem; color: var(--text); line-height: 1.7; }
+    .post-footer { margin-top: 1.25rem; display: flex; align-items: center; justify-content: space-between; }
+    .post-link { font-family: var(--mono); font-size: 0.72rem; color: var(--accent); letter-spacing: 0.1em; }
+    .empty-state { text-align: center; padding: 4rem 2rem; font-family: var(--mono); color: var(--muted); font-size: 0.82rem; letter-spacing: 0.1em; display: none; }
+    .empty-state.show { display: block; }
+    .post-full { display: none; padding: 8rem 3rem 6rem; max-width: var(--max); margin: 0 auto; }
+    .post-full.show { display: block; }
+    .post-full-back { font-family: var(--mono); font-size: 0.72rem; color: var(--accent); background: none; border: none; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; padding: 0; transition: color 0.2s; }
+    .post-full-back:hover { color: #fff; }
+    .post-full-title { font-family: var(--mono); font-size: clamp(1.5rem, 4vw, 2.2rem); color: #fff; font-weight: 400; margin-bottom: 1rem; line-height: 1.3; }
+    .post-full-meta { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+    .post-full-body { font-size: 0.95rem; line-height: 1.9; color: var(--text); }
+    .post-full-body h2 { font-family: var(--mono); font-size: 1.1rem; color: var(--accent); margin: 2rem 0 0.75rem; font-weight: 400; }
+    .post-full-body h3 { font-family: var(--mono); font-size: 0.95rem; color: #fff; margin: 1.5rem 0 0.5rem; font-weight: 400; }
+    .post-full-body p { margin-bottom: 1.25rem; }
+    .post-full-body ul, .post-full-body ol { margin: 0.75rem 0 1.25rem 1.5rem; }
+    .post-full-body li { margin-bottom: 0.4rem; }
+    .post-full-body code { font-family: var(--mono); background: var(--bg3); border: 1px solid var(--border); padding: 0.15rem 0.4rem; border-radius: 2px; font-size: 0.85em; color: var(--accent2); }
+    .post-full-body pre { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 1.25rem; margin: 1rem 0; overflow-x: auto; }
+    .post-full-body pre code { background: none; border: none; padding: 0; font-size: 0.85rem; color: var(--accent2); }
+    .post-full-body blockquote { border-left: 3px solid var(--accent); padding-left: 1rem; color: var(--muted); font-style: italic; margin: 1rem 0; }
+    .post-full-body a { color: var(--accent); }
+    .post-full-body strong { color: #fff; font-weight: 500; }
+    footer { padding: 1.75rem 3rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    footer p { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+    footer a { color: var(--accent); text-decoration: none; }
+    .fade-in { opacity: 0; transform: translateY(14px); transition: opacity 0.55s ease, transform 0.55s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { gap: 1rem; }
+      .nav-links a { font-size: 0.65rem; }
+      .page-header, .filters, .posts-wrap, .post-full { padding-left: 1.5rem; padding-right: 1.5rem; }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-logo">km://</a>
+    <ul class="nav-links">
+      <li><a href="/#about">About</a></li>
+      <li><a href="/#experience">Experience</a></li>
+      <li><a href="/#projects">Projects</a></li>
+      <li><a href="/blog.html" class="active">Blog</a></li>
+      <li><a href="/#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div id="listView">
+    <div class="page-header">
+      <p class="page-tag">// field notes</p>
+      <h1 class="page-title">Security <span>Blog</span></h1>
+      <p class="page-desc">Writeups, walkthroughs, study notes, and thoughts on cybersecurity — by Kyle Messer.</p>
+    </div>
+    <div class="filters" id="filters">
+      <button class="filter-btn active" onclick="filterPosts('all')">All</button>
+      <button class="filter-btn" onclick="filterPosts('tool')">Tool Writeups</button>
+      <button class="filter-btn" onclick="filterPosts('walkthrough')">Walkthroughs</button>
+      <button class="filter-btn" onclick="filterPosts('study')">Study Notes</button>
+      <button class="filter-btn" onclick="filterPosts('news')">Industry News</button>
+      <button class="filter-btn" onclick="filterPosts('career')">Career</button>
+    </div>
+    <div class="posts-wrap" id="postsWrap"></div>
+    <div class="empty-state" id="emptyState">// no posts in this category yet</div>
+  </div>
+
+  <div class="post-full" id="postFull">
+    <button class="post-full-back" onclick="backToList()">← Back to Blog</button>
+    <div id="postFullContent"></div>
+  </div>
+
+  <footer>
+    <p>© 2026 Kyle Messer · <a href="/">kylemesser.com</a></p>
+    <p>Built by hand · <a href="https://pages.github.com" target="_blank">GitHub Pages</a></p>
+  </footer>
+
+  <script>
+    const POSTS = [
+      {
+        id: 'from-myspace-to-kylemesser-com',
+        title: 'From MySpace to kylemesser.com — What Profile Customization Taught Me About Web Development',
+        category: 'career',
+        date: 'March 2026',
+        readTime: '8 min read',
+        excerpt: 'How customizing MySpace profiles in 2006 taught me fundamental web development and security concepts that I still use today as a cybersecurity professional.',
+        content: `
+          <p>When I tell people that my web development journey started with customizing MySpace profiles in 2006, I usually get a knowing smile from fellow millennials and confused looks from Gen Z. But here's the thing — those hours spent tweaking CSS to make my profile stand out from the default layouts taught me fundamental concepts that I still use today as a cybersecurity professional building tools and maintaining my own website.</p>
+          <p>Recently, while working on updates to kylemesser.com, I found myself reflecting on how that early exposure to HTML and CSS shaped my approach to both development and security. The principles I learned customizing social media profiles — understanding code structure, recognizing patterns, and thinking about user experience — directly translate to the work I do today in cybersecurity.</p>
+          <h2>The MySpace Era: Learning by Breaking Things</h2>
+          <p>Back in 2006, MySpace was the king of social media, and profile customization was everything. Unlike today's locked-down platforms, MySpace gave users an "About Me" section where you could inject raw HTML and CSS. This was both powerful and dangerous — exactly the kind of environment where you learn fast.</p>
+          <p>I spent countless hours copying and modifying code snippets, tweaking backgrounds, fonts, colors, and profile formatting until everything looked exactly right. Most of the time, I had no idea what I was actually doing — but that was the point. Breaking things and fixing them is how you actually learn.</p>
+          <p>What I was really building, without realizing it, was an intuitive understanding of how web technologies work together. The autoplay song that blasted the second anyone opened your page? That was embedded media. The custom background and font colors? CSS. The layout shifting when something went wrong? The DOM teaching me a lesson.</p>
+          <h2>Pattern Recognition and Problem Solving</h2>
+          <p>What I didn't realize at the time was that I was developing critical thinking skills that would prove invaluable in cybersecurity. When a layout didn't work as expected, I had to debug systematically, recognize patterns, research solutions, and test thoroughly. These same skills are essential when analyzing Nessus scan results or investigating security incidents.</p>
+          <h2>Understanding the Security Implications</h2>
+          <p>The security professional in me now looks back at MySpace's approach with a different perspective. Allowing users to inject arbitrary HTML and CSS was a recipe for disaster — the platform was a real-world XSS playground. Experiencing that environment firsthand gave me early, intuitive insight into why input validation matters. I didn't know what cross-site scripting was at 13. But I saw it happening.</p>
+          <h2>Building kylemesser.com: Applying Those Lessons</h2>
+          <p>Fast forward to today, and I'm maintaining my own professional portfolio site built from scratch — no templates, no WordPress, just HTML and CSS. The same stubborn curiosity that once made me spend hours tweaking profile layouts just to get them exactly right is what drove me to build every part of this site by hand.</p>
+          <p>The syntax has evolved significantly since 2006, but the core principles remain the same: understanding how elements relate to each other, how styling cascades, and how to create something clean and functional that you're proud to put your name on.</p>
+          <h2>Security-First Development Mindset</h2>
+          <p>The biggest difference between my MySpace days and now is the security-first mindset I bring to every project. When building features for my site or creating tools like PassAudit, I'm constantly thinking about trust boundaries, input validation, and what happens when things go wrong. Those considerations were absent from my teenage web experiments — now they're non-negotiable.</p>
+          <h2>Teaching the Next Generation</h2>
+          <p>One of the most rewarding parts of this journey has been teaching my kids Python and Arduino programming. I try to give them the same hands-on, break-it-and-fix-it experimentation that made learning so engaging for me — but with security thinking built in from the start.</p>
+          <h2>The Top 8</h2>
+          <p>MySpace gave you eight slots for your closest friends. In the spirit of that — I'm leaving my Top 8 open. If you made it this far, checked out PassAudit, or found your way here from LinkedIn — you're a candidate. I'm actively seeking my next cybersecurity role and would love to connect.</p>
+          <p>The site is live at <a href="https://kylemesser.com">kylemesser.com</a>. Come say hello.</p>
+        `
+      },
+      {
+        id: 'passaudit-writeup',
+        title: 'Building PassAudit: A Password Strength Analyzer',
+        category: 'tool',
+        date: 'March 2026',
+        readTime: '6 min read',
+        excerpt: 'After years watching users recycle predictable passwords on government systems, I built a client-side password analyzer that shows exactly why "clever" passwords aren\'t. Here\'s how the math works.',
+        content: `
+<h2>The Reaction That Inspired This Tool</h2>
+<p>When I show colleagues my password analyzer, the most common reaction is always the same. They confidently type in their "clever" password — P@ssw0rd123 or Summ3r2024! — expecting a green checkmark. Instead, they watch in disbelief as the tool flags it as weak and estimates it would crack in minutes.</p>
+<p>Here's the hard truth: those deliberate substitutions don't fool anyone. Attackers have known about leet speak for decades, and every serious cracking wordlist includes these variations automatically. After years supporting Department of State contractors and watching users recycle predictable passwords on government systems, I decided to build a tool that shows people exactly why their "secure" passwords aren't.</p>
+<h2>Why Client-Side Analysis Matters</h2>
+<p>The biggest problem with most password checkers is trust. How can you verify the strength of your most sensitive passwords by sending them to someone else's server? You can't. That's why PassAudit runs entirely in your browser using vanilla HTML, CSS, and JavaScript — no frameworks, no backend, nothing ever leaves your device.</p>
+<h2>The Analysis Engine: Beyond Simple Rules</h2>
+<p>PassAudit evaluates passwords across multiple dimensions that matter in real-world attacks.</p>
+<h3>Entropy Calculation: The Math That Matters</h3>
+<p>Here's where the real security analysis happens:</p>
+<pre><code>function calculateEntropy(password) {
+  let poolSize = 0;
+  if (/[a-z]/.test(password)) poolSize += 26;
+  if (/[A-Z]/.test(password)) poolSize += 26;
+  if (/[0-9]/.test(password)) poolSize += 10;
+  if (/[^a-zA-Z0-9]/.test(password)) poolSize += 32;
+  return password.length * Math.log2(poolSize);
+}</code></pre>
+<p>The formula is straightforward: length x log2(pool_size). A 12-character password using all four character sets gives roughly 78 bits of entropy. Anything above 128 bits is extremely strong.</p>
+<h3>The Blacklist: Learning from Breaches</h3>
+<p>I compiled over 50 known weak passwords from breach data. The patterns were depressingly predictable — seasonal passwords, keyboard walks, leet speak substitutions, and enterprise favorites like variations of "welcome" that dominated government new-account setups.</p>
+<h2>Making Math Meaningful: Crack Time Estimates</h2>
+<p>Raw entropy numbers don't resonate with most users, so PassAudit translates them into estimated crack times under two realistic scenarios: online attacks at 1,000 attempts per second, and offline GPU attacks at 10 billion attempts per second. That P@ssw0rd123 they thought was clever? Seconds to minutes offline.</p>
+<h2>Privacy by Design: The HIBP Integration Plan</h2>
+<p>The next major feature is integration with HaveIBeenPwned using k-anonymity. You hash your password with SHA-1, send only the first 5 characters of that hash, and receive back matching suffixes. Your actual password never leaves the browser — breach detection without the privacy tradeoff.</p>
+<h2>What's Next</h2>
+<ul>
+  <li>HaveIBeenPwned integration using k-anonymity</li>
+  <li>Passphrase generator for creating truly strong passwords</li>
+  <li>Bulk analysis mode for security audits</li>
+</ul>
+<p>You can try PassAudit at <a href="/passaudit.html">kylemesser.com/passaudit.html</a> — and since it's fully client-side, you can view the source to see exactly how it works.</p>
+        `
+      }
+    ];
+
+    const TAG_CLASS = { tool: 'tag-tool', walkthrough: 'tag-walkthrough', study: 'tag-study', news: 'tag-news', career: 'tag-career' };
+    const TAG_LABEL = { tool: 'Tool Writeup', walkthrough: 'Walkthrough', study: 'Study Notes', news: 'Industry News', career: 'Career' };
+
+    let currentFilter = 'all';
+
+    function renderPosts(filter) {
+      const wrap = document.getElementById('postsWrap');
+      const empty = document.getElementById('emptyState');
+      const filtered = filter === 'all' ? POSTS : POSTS.filter(p => p.category === filter);
+      if (filtered.length === 0) { wrap.innerHTML = ''; empty.classList.add('show'); return; }
+      empty.classList.remove('show');
+      wrap.innerHTML = filtered.map((post, i) => `
+        <a class="post-card fade-in" onclick="openPost('${post.id}')" href="javascript:void(0)" style="animation-delay:${i*0.08}s">
+          <div class="post-meta">
+            <span class="post-tag ${TAG_CLASS[post.category]}">${TAG_LABEL[post.category]}</span>
+            <span class="post-date">${post.date}</span>
+            <span class="post-read">${post.readTime}</span>
+          </div>
+          <div class="post-title">${post.title}</div>
+          <div class="post-excerpt">${post.excerpt}</div>
+          <div class="post-footer"><span class="post-link">Read more →</span></div>
+        </a>
+      `).join('');
+      setTimeout(() => { document.querySelectorAll('.fade-in').forEach(el => el.classList.add('visible')); }, 50);
+    }
+
+    function filterPosts(cat) {
+      currentFilter = cat;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      renderPosts(cat);
+    }
+
+    function openPost(id) {
+      const post = POSTS.find(p => p.id === id);
+      if (!post) return;
+      document.getElementById('listView').style.display = 'none';
+      const full = document.getElementById('postFull');
+      full.classList.add('show');
+      document.getElementById('postFullContent').innerHTML = `
+        <div class="post-full-meta">
+          <span class="post-tag ${TAG_CLASS[post.category]}">${TAG_LABEL[post.category]}</span>
+          <span class="post-date">${post.date}</span>
+          <span class="post-read">${post.readTime}</span>
+        </div>
+        <h1 class="post-full-title">${post.title}</h1>
+        <div class="post-full-body">${post.content}</div>
+      `;
+      window.scrollTo(0, 0);
+    }
+
+    function backToList() {
+      document.getElementById('listView').style.display = 'block';
+      document.getElementById('postFull').classList.remove('show');
+      window.scrollTo(0, 0);
+    }
+
+    renderPosts('all');
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
