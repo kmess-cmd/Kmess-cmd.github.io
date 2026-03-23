@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Forge — Kyle Messer | 3D Printing</title>
+  <meta name="description" content="Kyle Messer's 3D printing workshop. Custom prints, one-offs, gifts, and functional builds. Bambu A1. Just ask."/>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-0XGZPZLEQT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-0XGZPZLEQT');
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #1a3a6e;
+      --bg2: #1e4278;
+      --bg3: #234d8a;
+      --accent: #7dd4f0;
+      --accent2: #80ffcc;
+      --amber: #ffb347;
+      --text: #d6e8f7;
+      --muted: #7a9cc0;
+      --border: #2e4470;
+      --mono: 'Share Tech Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+      --max: 1100px;
+    }
+
+    html { scroll-behavior: smooth; background: #1a3a6e; }
+    body { background: transparent; color: var(--text); font-family: var(--sans); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+
+    /* BLUEPRINT GRID BACKGROUND */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-color: #1a3a6e;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px),
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 80px 80px, 80px 80px, 16px 16px, 16px 16px;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.2rem 3rem;
+      background: rgba(26,58,110,0.97);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-family: var(--mono); color: var(--accent); font-size: 0.95rem; letter-spacing: 0.1em; text-decoration: none; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; transition: color 0.2s; font-family: var(--mono); }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 10rem 3rem 4rem;
+      max-width: var(--max);
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Wireframe cube decoration */
+    .cube-bg {
+      position: absolute;
+      right: -60px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 420px;
+      height: 420px;
+      opacity: 0.04;
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--amber);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.1s;
+    }
+
+    .hero-title {
+      font-family: var(--mono);
+      font-size: clamp(3rem, 7vw, 6rem);
+      color: #e8f4ff;
+      font-weight: 400;
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.2s;
+    }
+
+    .hero-title .accent { color: var(--accent); }
+    .hero-title .accent2 { color: var(--accent2); }
+
+    .hero-manifesto {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      color: var(--text);
+      max-width: 520px;
+      line-height: 1.9;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.4s;
+      border-left: 2px solid var(--amber);
+      padding-left: 1.25rem;
+    }
+
+    .hero-specs {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.5s;
+    }
+
+    .spec-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .spec-label {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .spec-value {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.6s;
+    }
+
+    .btn {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.85rem 1.75rem;
+      border-radius: 2px;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+      display: inline-block;
+    }
+
+    .btn-primary { background: var(--accent); color: #1a2744; font-weight: 700; }
+    .btn-primary:hover { background: #a8e4f5; }
+    .btn-amber { background: transparent; color: var(--amber); border: 2px solid rgba(255,179,71,0.5); box-shadow: 0 0 8px rgba(255,179,71,0.12); }
+    .btn-amber:hover { background: rgba(255,179,71,0.1); border-color: var(--amber); }
+    .btn-outline { background: transparent; color: var(--accent); border: 2px solid rgba(125,212,240,0.4); box-shadow: 0 0 8px rgba(125,212,240,0.1); }
+    .btn-outline:hover { background: rgba(125,212,240,0.06); border-color: var(--accent); }
+
+    /* SECTION BASE */
+    .section { padding: 6rem 3rem; position: relative; z-index: 1; }
+    .section.alt { background: rgba(30,66,120,0.95); }
+    .inner { max-width: var(--max); margin: 0 auto; }
+
+    .section-header { margin-bottom: 3rem; }
+    .section-eyebrow { font-family: var(--mono); font-size: 0.68rem; color: var(--amber); letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .section-title { font-family: var(--mono); font-size: clamp(1.5rem, 3vw, 2.2rem); color: #e8f4ff; font-weight: 400; }
+    .section-title span { color: var(--accent); }
+    .section-sub { font-size: 0.875rem; color: var(--muted); margin-top: 0.5rem; max-width: 500px; }
+
+    /* WHAT I MAKE — category cards */
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .cat-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1.75rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .cat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--amber);
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+
+    .cat-card:hover { border-color: var(--amber); transform: translateY(-3px); }
+    .cat-card:hover::before { opacity: 1; }
+
+    .cat-icon { font-size: 2rem; margin-bottom: 0.75rem; display: block; }
+    .cat-name { font-family: var(--mono); font-size: 0.82rem; color: #e8f4ff; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.4rem; }
+    .cat-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
+
+    /* CAROUSEL */
+    .carousel-wrap {
+      position: relative;
+      overflow: hidden;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .carousel-track {
+      display: flex;
+      gap: 1.5rem;
+      animation: scrollTrack 30s linear infinite;
+      width: max-content;
+      padding: 1.5rem;
+    }
+
+    .carousel-wrap:hover .carousel-track { animation-play-state: paused; }
+
+    @keyframes scrollTrack {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .carousel-item {
+      width: 220px;
+      height: 220px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .carousel-item:hover { border-color: var(--accent); }
+
+    .carousel-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      inset: 0;
+    }
+
+    .carousel-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .carousel-placeholder-icon { font-size: 2rem; opacity: 0.3; }
+
+    .carousel-fade-left, .carousel-fade-right {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 80px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .carousel-fade-left { left: 0; background: linear-gradient(90deg, var(--bg2), transparent); }
+    .carousel-fade-right { right: 0; background: linear-gradient(-90deg, var(--bg2), transparent); }
+
+    /* PAST PRINTS GRID */
+    .prints-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .print-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+      position: relative;
+    }
+
+    .print-card:hover { border-color: var(--accent2); transform: translateY(-3px); }
+
+    .print-img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+      background: var(--bg);
+    }
+
+    .print-img-placeholder {
+      width: 100%;
+      height: 220px;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .print-img-placeholder span { font-size: 2rem; opacity: 0.2; }
+
+    .print-info { padding: 1.25rem; }
+    .print-category { font-family: var(--mono); font-size: 0.62rem; color: var(--accent2); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.35rem; }
+    .print-name { font-family: var(--mono); font-size: 0.9rem; color: #e8f4ff; margin-bottom: 0.35rem; }
+    .print-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
+
+    /* REQUEST FORM */
+    .request-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 4rem;
+      align-items: start;
+    }
+
+    .request-info h3 { font-family: var(--mono); font-size: 1rem; color: #e8f4ff; margin-bottom: 0.75rem; }
+    .request-info p { font-size: 0.875rem; color: var(--text); line-height: 1.8; margin-bottom: 1rem; }
+
+    .request-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+
+    .detail-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+    }
+
+    .detail-icon { color: var(--amber); font-size: 0.9rem; }
+    .detail-text { color: var(--text); }
+    .detail-text span { color: var(--accent); }
+
+    .request-form { display: flex; flex-direction: column; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-group label { font-family: var(--mono); font-size: 0.65rem; color: var(--amber); letter-spacing: 0.15em; text-transform: uppercase; }
+    .form-group input, .form-group textarea, .form-group select {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      transition: border-color 0.2s;
+      outline: none;
+      resize: vertical;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--amber); }
+    .form-group textarea { min-height: 120px; }
+    .form-group select option { background: var(--bg3); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    /* SUPPORT SECTION */
+    .support-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .support-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--amber), var(--accent2));
+    }
+
+    .support-icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
+    .support-title { font-family: var(--mono); font-size: 1.1rem; color: #e8f4ff; margin-bottom: 0.75rem; }
+    .support-text { font-size: 0.875rem; color: var(--text); line-height: 1.8; margin-bottom: 2rem; max-width: 420px; margin-left: auto; margin-right: auto; }
+
+    /* DIVIDER */
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(125,212,240,0.15), rgba(128,255,204,0.1), transparent);
+      margin: 0;
+    }
+
+    /* FOOTER */
+    footer { padding: 1.75rem 3rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1; }
+    footer p { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { opacity: 0; transform: translateY(14px); transition: opacity 0.55s ease, transform 0.55s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      nav { padding: 1rem 1.5rem; }
+      .hero { padding: 8rem 1.5rem 3rem; }
+      .section { padding: 4rem 1.5rem; }
+      .categories { grid-template-columns: 1fr 1fr; }
+      .prints-grid { grid-template-columns: 1fr 1fr; }
+      .request-wrap { grid-template-columns: 1fr; gap: 2rem; }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; padding: 1.5rem; }
+    }
+
+    @media (max-width: 600px) {
+      .categories { grid-template-columns: 1fr; }
+      .prints-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .hero-specs { gap: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-logo">km://</a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/blog.html">Blog</a></li>
+      <li><a href="/forge.html" class="active">Forge</a></li>
+      <li><a href="/#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <div style="position:relative;z-index:1;">
+    <section class="hero">
+
+      <!-- Wireframe cube SVG background -->
+      <svg class="cube-bg" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="80" y="80" width="240" height="240" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+        <rect x="40" y="40" width="240" height="240" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+        <line x1="40" y1="40" x2="80" y2="80" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+        <line x1="280" y1="40" x2="320" y2="80" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+        <line x1="40" y1="280" x2="80" y2="320" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+        <line x1="280" y1="280" x2="320" y2="320" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+        <!-- inner grid lines -->
+        <line x1="80" y1="160" x2="320" y2="160" stroke="rgba(255,255,255,0.5)" stroke-width="0.5" opacity="0.5"/>
+        <line x1="80" y1="240" x2="320" y2="240" stroke="rgba(255,255,255,0.5)" stroke-width="0.5" opacity="0.5"/>
+        <line x1="160" y1="80" x2="160" y2="320" stroke="rgba(255,255,255,0.5)" stroke-width="0.5" opacity="0.5"/>
+        <line x1="240" y1="80" x2="240" y2="320" stroke="rgba(255,255,255,0.5)" stroke-width="0.5" opacity="0.5"/>
+      </svg>
+
+      <p class="hero-tag">// The Forge · 3D Printing Lab</p>
+      <h1 class="hero-title">I have a<br/><span class="accent">printer.</span><br/>I like making<br/><span class="accent2">things.</span></h1>
+      <p class="hero-manifesto">
+        Tell me what you need. Gifts, art, tools, something weird, something practical — I don't mind. If it fits the bed or I can piece it together, let's make it happen.
+      </p>
+
+      <div class="hero-specs">
+        <div class="spec-item">
+          <span class="spec-label">Printer</span>
+          <span class="spec-value">Bambu A1</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Bed Volume</span>
+          <span class="spec-value">256 × 256 × 256mm</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Larger prints</span>
+          <span class="spec-value">Available — ask me</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Location</span>
+          <span class="spec-value">Melbourne, FL</span>
+        </div>
+      </div>
+
+      <div class="hero-actions">
+        <a href="#request" class="btn btn-primary">Request a Print</a>
+        <a href="#prints" class="btn btn-outline">See Past Work</a>
+        <a href="https://buymeacoffee.com" target="_blank" class="btn btn-amber">☕ Buy Me a Coffee</a>
+      </div>
+
+    </section>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- WHAT I MAKE -->
+  <section class="section alt" id="what">
+    <div class="inner">
+      <div class="section-header fade-in">
+        <p class="section-eyebrow">// 01 · What I Make</p>
+        <h2 class="section-title">A little of <span>everything</span></h2>
+        <p class="section-sub">No specialty, no limits. If you can dream it and it fits a printer bed, we can probably make it.</p>
+      </div>
+      <div class="categories">
+        <div class="cat-card fade-in">
+          <span class="cat-icon">🎁</span>
+          <div class="cat-name">Gifts</div>
+          <div class="cat-desc">Custom, personal, one-of-a-kind. The kind of thing you can't buy in a store.</div>
+        </div>
+        <div class="cat-card fade-in">
+          <span class="cat-icon">🎨</span>
+          <div class="cat-name">Art & Decor</div>
+          <div class="cat-desc">Sculptures, wall pieces, display items. Functional aesthetics or pure art.</div>
+        </div>
+        <div class="cat-card fade-in">
+          <span class="cat-icon">🔧</span>
+          <div class="cat-name">Functional</div>
+          <div class="cat-desc">Mounts, brackets, organizers, tools. Things that solve actual problems.</div>
+        </div>
+        <div class="cat-card fade-in">
+          <span class="cat-icon">✨</span>
+          <div class="cat-name">Fun & Novelty</div>
+          <div class="cat-desc">Weird, cool, unexpected. If it made you smile when you thought of it, that's enough.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- INSPIRATION CAROUSEL -->
+  <section class="section" id="inspiration">
+    <div class="inner">
+      <div class="section-header fade-in">
+        <p class="section-eyebrow">// 02 · Inspiration</p>
+        <h2 class="section-title">What's <span>possible</span></h2>
+        <p class="section-sub">A few things that represent the kind of work the printer can do. Hover to pause.</p>
+      </div>
+    </div>
+    <div class="carousel-wrap fade-in" style="margin-top:2rem;">
+      <div class="carousel-fade-left"></div>
+      <div class="carousel-fade-right"></div>
+      <div class="carousel-track" id="carouselTrack">
+        <!-- Items duplicated for infinite scroll -->
+        <div class="carousel-item"><div class="carousel-placeholder"><span class="carousel-placeholder-icon">🖨️</span>Add inspiration image</div></div>
+        <div class="carousel-item"><div class="carousel-placeholder"><span class="carousel-placeholder-icon">🖨️</span>Add inspiration image</div></div>
+        <div class="carousel-item"><div class="carousel-placeholder"><span class="carousel-placeholder-icon">🖨️</span>Add inspiration image</div></div>
+        <div class="carousel-item"><div class="carousel-placeholder"><span class="carousel-placeholder-icon">🖨️</span>Add inspiration image</div></div>
+        <div class="carousel-item"><div class="carousel-placeholder"><span class="carousel-placeholder-icon">🖨️</span>Add inspiration image</div></div>
+        <div class="carousel-item"><div class="carousel-placeholder"><span class="carousel-placeholder-icon">🖨️</span>Add inspiration image</div></div>
+        <!-- Duplicate set for seamless loop -->
+        <div class="carousel-item"><div class="carousel-placeholder"><span class="carousel-placeholder-icon">🖨️</span>Add inspiration image</div></div>
+        <div class="carousel-item"><div class="carousel-placeholder"><span class="carousel-placeholder-icon">🖨️</span>Add inspiration image</div></div>
+        <div class="carousel-item"><div class="carousel-placeholder"><span class="carousel-placeholder-icon">🖨️</span>Add inspiration image</div></div>
+        <div class="carousel-item"><div class="carousel-placeholder"><span class="carousel-placeholder-icon">🖨️</span>Add inspiration image</div></div>
+        <div class="carousel-item"><div class="carousel-placeholder"><span class="carousel-placeholder-icon">🖨️</span>Add inspiration image</div></div>
+        <div class="carousel-item"><div class="carousel-placeholder"><span class="carousel-placeholder-icon">🖨️</span>Add inspiration image</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- PAST PRINTS -->
+  <section class="section alt" id="prints">
+    <div class="inner">
+      <div class="section-header fade-in">
+        <p class="section-eyebrow">// 03 · Past Work</p>
+        <h2 class="section-title">Off the <span>bed</span></h2>
+        <p class="section-sub">Real prints, real projects. More added as they come off the printer.</p>
+      </div>
+      <div class="prints-grid">
+
+        <div class="print-card fade-in">
+          <div class="print-img-placeholder"><span>📷</span>Add your photo here</div>
+          <div class="print-info">
+            <div class="print-category">Gift</div>
+            <div class="print-name">Your Print Title</div>
+            <div class="print-desc">Short description of what this was, who it was for, or anything interesting about the print.</div>
+          </div>
+        </div>
+
+        <div class="print-card fade-in">
+          <div class="print-img-placeholder"><span>📷</span>Add your photo here</div>
+          <div class="print-info">
+            <div class="print-category">Functional</div>
+            <div class="print-name">Your Print Title</div>
+            <div class="print-desc">Short description of what this was, who it was for, or anything interesting about the print.</div>
+          </div>
+        </div>
+
+        <div class="print-card fade-in">
+          <div class="print-img-placeholder"><span>📷</span>Add your photo here</div>
+          <div class="print-info">
+            <div class="print-category">Art & Decor</div>
+            <div class="print-name">Your Print Title</div>
+            <div class="print-desc">Short description of what this was, who it was for, or anything interesting about the print.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- REQUEST FORM -->
+  <section class="section" id="request">
+    <div class="inner">
+      <div class="section-header fade-in">
+        <p class="section-eyebrow">// 04 · Request a Print</p>
+        <h2 class="section-title">Let's make <span>something</span></h2>
+      </div>
+      <div class="request-wrap">
+        <div class="request-info fade-in">
+          <h3>Just ask.</h3>
+          <p>No catalog, no minimums, no pressure. Tell me what you're thinking and I'll let you know if it's doable. I print things because I enjoy it — if I can help you out along the way, even better.</p>
+          <p>If you want to cover materials or just say thanks, there's a Buy Me a Coffee link below. Totally optional.</p>
+          <div class="request-details">
+            <div class="detail-row">
+              <span class="detail-icon">▸</span>
+              <span class="detail-text">Printer: <span>Bambu A1</span></span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-icon">▸</span>
+              <span class="detail-text">Max size: <span>256 × 256 × 256mm</span> (larger available)</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-icon">▸</span>
+              <span class="detail-text">Location: <span>Melbourne, FL</span></span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-icon">▸</span>
+              <span class="detail-text">Turnaround: <span>Depends on complexity — I'll let you know</span></span>
+            </div>
+          </div>
+        </div>
+
+        <form class="request-form fade-in" action="https://formspree.io/f/xzdjepwo" method="POST">
+          <input type="hidden" name="_subject" value="New Forge Request — kylemesser.com"/>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="req-name">Name</label>
+              <input type="text" id="req-name" name="name" placeholder="Your name" required/>
+            </div>
+            <div class="form-group">
+              <label for="req-email">Email</label>
+              <input type="email" id="req-email" name="email" placeholder="your@email.com" required/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="req-type">Type of Print</label>
+            <select id="req-type" name="type">
+              <option value="">Select a category...</option>
+              <option value="gift">Gift</option>
+              <option value="art">Art & Decor</option>
+              <option value="functional">Functional / Tool</option>
+              <option value="novelty">Fun & Novelty</option>
+              <option value="other">Not sure / Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="req-desc">What do you have in mind?</label>
+            <textarea id="req-desc" name="description" placeholder="Describe what you're looking for — size, color, purpose, reference images, anything helps..." required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="req-ref">Reference link (optional)</label>
+            <input type="url" id="req-ref" name="reference" placeholder="MakerWorld, Printables, or any link..."/>
+          </div>
+          <button type="submit" class="btn btn-primary" style="align-self:flex-start;">Send Request</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- SUPPORT -->
+  <section class="section alt" id="support">
+    <div class="inner">
+      <div class="support-card fade-in">
+        <span class="support-icon">☕</span>
+        <div class="support-title">Buy Me a Coffee</div>
+        <p class="support-text">I print things because I enjoy it. But if I made something for you, or you just want to say thanks for the tool or blog post that helped you out — this is the place. No pressure, ever.</p>
+        <a href="https://buymeacoffee.com" target="_blank" class="btn btn-amber">Support the Forge</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 Kyle Messer · <a href="/">kylemesser.com</a></p>
+    <p>The Forge · Melbourne, FL · <a href="/#contact">Contact</a></p>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
